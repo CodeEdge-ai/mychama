@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#020A05">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>myChama Platform v4</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#020A05;--s1:#071410;--s2:#0A1E14;--s3:#0E2A1C;--gold:#D4A843;--gold2:#F0C84A;--gdim:rgba(212,168,67,.1);--gglow:rgba(212,168,67,.2);--green:#22C55E;--red:#EF4444;--blue:#60A5FA;--purple:#A78BFA;--orange:#F97316;--claude:#D97706;--grok:#0EA5E9;--gpt:#10B981;--text:#EDE8D8;--muted:#5A7A68;--dim:#2A4A38;--border:rgba(255,255,255,.06);--borderg:rgba(212,168,67,.18);--r:16px;--rs:10px;--nav:68px;--super:#EF4444;--admin:#F97316;--treasurer:#F0C84A;--member:#22C55E}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:'Space Grotesk',sans-serif}
+html,body{height:100%;background:var(--bg);color:var(--text);font-size:14px;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(212,168,67,.06),transparent),radial-gradient(ellipse 60% 40% at 80% 110%,rgba(22,197,94,.04),transparent);pointer-events:none;z-index:0}
+#onboard{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3000;padding:24px}
+.ob-logo{text-align:center;margin-bottom:32px}
+.ob-orb{width:86px;height:86px;border-radius:24px;background:linear-gradient(135deg,rgba(212,168,67,.13),rgba(22,197,94,.07));border:1.5px solid var(--borderg);display:flex;align-items:center;justify-content:center;margin:0 auto 13px;font-size:37px;position:relative;animation:porb 3s ease-in-out infinite}
+@keyframes porb{0%,100%{box-shadow:0 0 0 0 var(--gglow)}50%{box-shadow:0 0 0 14px transparent}}
+.ob-orb::after{content:'';position:absolute;inset:-6px;border-radius:30px;border:1px solid var(--borderg);opacity:.3}
+.ob-logo h1{font-family:'Playfair Display',serif;font-size:35px;color:var(--gold)}
+.ob-logo p{color:var(--muted);font-size:12px;margin-top:3px}
+.ob-ver{font-size:10px;color:var(--dim);background:var(--s2);padding:2px 8px;border-radius:20px;margin-top:5px;display:inline-block}
+.ob-cards{display:grid;grid-template-columns:1fr 1fr;gap:11px;width:100%;max-width:330px;margin-bottom:22px}
+.ob-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:18px 12px;text-align:center;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:7px}
+.ob-card:active{transform:scale(.95)}
+.ob-card.primary{border-color:var(--borderg);background:linear-gradient(135deg,rgba(212,168,67,.07),rgba(22,197,94,.03))}
+.ob-card-ic{font-size:30px}.ob-card-t{font-weight:700;font-size:13px}.ob-card-s{font-size:10px;color:var(--muted);line-height:1.4}
+.ob-super{color:var(--muted);font-size:11px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+#join-screen,#create-screen{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:2500;padding:22px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.form-box{width:100%;max-width:340px;padding-top:40px;padding-bottom:50px}
+.back-btn{color:var(--muted);font-size:12px;cursor:pointer;margin-bottom:18px;display:flex;align-items:center;gap:5px}
+.form-title{font-family:'Playfair Display',serif;font-size:25px;color:var(--gold);margin-bottom:5px}
+.form-sub{font-size:12px;color:var(--muted);margin-bottom:22px;line-height:1.5}
+#lock{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:2000;gap:22px;padding:20px}
+.l-top{text-align:center}
+.l-av{width:54px;height:54px;border-radius:15px;background:linear-gradient(135deg,rgba(212,168,67,.14),rgba(22,197,94,.07));border:1.5px solid var(--borderg);display:flex;align-items:center;justify-content:center;margin:0 auto 9px;font-size:22px;font-weight:700;color:var(--gold)}
+.l-name{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold)}
+.l-chama{font-size:11px;color:var(--muted);margin-top:2px}
+.l-role{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;margin-top:6px}
+.rl-super{background:rgba(239,68,68,.14);color:var(--super)}.rl-admin{background:rgba(249,115,22,.14);color:var(--admin)}.rl-treasurer{background:rgba(240,200,74,.14);color:var(--treasurer)}.rl-member{background:rgba(34,197,94,.11);color:var(--member)}
+.pdots{display:flex;gap:12px}
+.pd{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--borderg);transition:all .2s}
+.pd.on{background:var(--gold);border-color:var(--gold);transform:scale(1.3);box-shadow:0 0 8px var(--gglow)}
+.kpad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:250px}
+.kk{aspect-ratio:1;background:var(--s2);border:1px solid var(--border);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:19px;font-weight:600}
+.kk .ks{font-size:8px;color:var(--muted);letter-spacing:1px;font-weight:400}
+.kk:active{transform:scale(.87);background:var(--s3)}
+.kk.del{background:transparent;border-color:transparent;color:var(--muted);font-size:15px}
+.kk.ok{background:var(--gold);color:#000;border-color:var(--gold)}
+.lmsg{font-size:11px;color:var(--dim)}
+.l-switch{font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shk{animation:shk .3s ease}
+#app{position:fixed;inset:0;display:none;flex-direction:column;z-index:1}
+.abar{display:flex;align-items:center;justify-content:space-between;padding:44px 14px 8px;position:relative;z-index:10}
+.abar-l{display:flex;flex-direction:column}
+.abar-logo{font-family:'Playfair Display',serif;font-size:17px;color:var(--gold);line-height:1}
+.abar-sub{font-size:9px;color:var(--muted);margin-top:1px}
+.abar-r{display:flex;gap:5px}
+.ib{width:34px;height:34px;border-radius:9px;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all .15s;flex-shrink:0;position:relative}
+.ib:active{transform:scale(.87)}
+.ib-b{position:absolute;top:-3px;right:-3px;width:13px;height:13px;background:var(--red);border-radius:50%;font-size:8px;font-weight:700;display:none;align-items:center;justify-content:center;color:#fff}
+#sub-banner{background:linear-gradient(90deg,rgba(212,168,67,.09),rgba(22,197,94,.05));border-bottom:1px solid var(--borderg);padding:6px 13px;display:flex;align-items:center;justify-content:space-between;z-index:50;position:relative;flex-shrink:0}
+.sub-i{font-size:10px;color:var(--gold)}
+.sub-up{font-size:10px;font-weight:700;background:var(--gold);color:#000;padding:3px 8px;border-radius:7px;cursor:pointer}
+.screens{flex:1;overflow:hidden;position:relative}
+.sc{position:absolute;inset:0;overflow-y:auto;padding:3px 12px calc(var(--nav)+12px);display:none;-webkit-overflow-scrolling:touch}
+.sc.on{display:block}
+.bnav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:rgba(7,20,16,.97);backdrop-filter:blur(18px);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 2px 6px;z-index:100}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 1px;cursor:pointer;border-radius:8px;transition:all .2s;position:relative}
+.ni-ic{font-size:18px}.ni-lb{font-size:9px;color:var(--dim);font-weight:500}
+.ni.on .ni-lb{color:var(--gold)}
+.nbadge{position:absolute;top:2px;right:calc(50% - 13px);background:var(--red);color:#fff;font-size:8px;font-weight:700;min-width:13px;height:13px;border-radius:7px;display:none;align-items:center;justify-content:center;padding:0 2px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:9px;position:relative;z-index:1}
+.card.gb{border-color:var(--borderg)}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px}
+.sc2{background:var(--s1);border:1px solid var(--border);border-radius:var(--rs);padding:11px}
+.slb{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.7px}
+.sv{font-size:17px;font-weight:700}
+.sv.gold{color:var(--gold)}.sv.green{color:var(--green)}.sv.red{color:var(--red)}.sv.blue{color:var(--blue)}.sv.purple{color:var(--purple)}
+.hero{border:1px solid var(--borderg);border-radius:var(--r);padding:2px;margin-bottom:9px;position:relative;overflow:hidden;z-index:1;background:linear-gradient(135deg,rgba(212,168,67,.08),rgba(22,197,94,.04))}
+.hero-in{background:linear-gradient(135deg,#0A2A18,#163A24);border-radius:14px;padding:14px;position:relative}
+.hero-in::before{content:'◈';position:absolute;right:-8px;top:-8px;font-size:90px;color:rgba(212,168,67,.04);pointer-events:none}
+.htag{font-size:10px;color:rgba(237,232,216,.4);letter-spacing:1px;text-transform:uppercase}
+.hname{font-family:'Playfair Display',serif;font-size:24px;color:var(--gold);margin:2px 0 1px}
+.hsub{font-size:11px;color:rgba(237,232,216,.5)}
+.hcode{font-size:10px;color:var(--gold);background:rgba(212,168,67,.12);border:1px solid var(--borderg);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:5px;letter-spacing:2px;font-weight:700;cursor:pointer}
+.plan-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:11px;font-size:10px;font-weight:700}
+.plan-free{background:rgba(90,122,104,.14);color:var(--muted)}.plan-starter{background:rgba(212,168,67,.11);color:var(--gold)}.plan-pro{background:rgba(167,139,250,.11);color:var(--purple)}
+.sh{display:flex;align-items:center;justify-content:space-between;margin:13px 0 7px}
+.sh-t{font-size:13px;font-weight:600}.sh-a{font-size:11px;color:var(--gold);cursor:pointer;font-weight:500}
+.li{background:var(--s1);border:1px solid var(--border);border-radius:var(--rs);padding:10px;margin-bottom:5px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .15s;position:relative;z-index:1}
+.li:active{background:var(--s2)}
+.av{width:34px;height:34px;border-radius:9px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0}
+.li-i{flex:1;min-width:0}.li-n{font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.li-s{font-size:10px;color:var(--muted);margin-top:1px}.li-r{text-align:right;flex-shrink:0}
+.rpill{display:inline-flex;align-items:center;gap:2px;padding:2px 5px;border-radius:9px;font-size:9px;font-weight:700}
+.rpill.super{background:rgba(239,68,68,.11);color:var(--super)}.rpill.admin{background:rgba(249,115,22,.11);color:var(--admin)}.rpill.treasurer{background:rgba(240,200,74,.11);color:var(--treasurer)}.rpill.member{background:rgba(34,197,94,.09);color:var(--member)}
+.badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:15px;font-size:10px;font-weight:600}
+.badge.g{background:rgba(34,197,94,.1);color:var(--green)}.badge.r{background:rgba(239,68,68,.1);color:var(--red)}.badge.gold{background:var(--gdim);color:var(--gold)}.badge.b{background:rgba(96,165,250,.1);color:var(--blue)}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 13px;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .18s;width:100%}
+.btn:active{transform:scale(.95)}
+.btn-gold{background:var(--gold);color:#0a0a0a}.btn-out{background:transparent;border:1px solid var(--borderg);color:var(--gold)}.btn-s{background:var(--s3);color:var(--text);border:none}.btn-r{background:rgba(239,68,68,.08);color:var(--red);border:1px solid rgba(239,68,68,.17)}.btn-purple{background:rgba(167,139,250,.09);color:var(--purple);border:1px solid rgba(167,139,250,.19)}
+.btn-sm{padding:5px 10px;font-size:11px;width:auto;border-radius:7px}.btn-xs{padding:3px 7px;font-size:10px;width:auto;border-radius:6px}
+.brow{display:flex;gap:5px;flex-wrap:wrap}
+.fg{margin-bottom:10px}.fl{font-size:11px;color:var(--muted);margin-bottom:3px;display:block;font-weight:500}
+.fi{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--rs);padding:9px 11px;color:var(--text);font-size:12px;outline:none;transition:border-color .2s}
+.fi:focus{border-color:var(--borderg)}.fi::placeholder{color:var(--dim)}
+select.fi option{background:var(--s2)}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:4000;display:none;align-items:flex-end;backdrop-filter:blur(5px)}
+.mo.open{display:flex}
+.mb{background:var(--s1);border-radius:var(--r) var(--r) 0 0;border-top:1px solid var(--borderg);padding:18px 13px 40px;width:100%;max-height:92vh;overflow-y:auto}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mo.open .mb{animation:su .24s ease}
+.mt{font-family:'Playfair Display',serif;font-size:20px;color:var(--gold);margin-bottom:13px}
+.mh{width:35px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 13px}
+.aic{background:linear-gradient(135deg,rgba(212,168,67,.06),rgba(22,197,94,.02));border:1px solid var(--borderg);border-radius:var(--r);padding:12px;margin-bottom:9px}
+.aihdr{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.aiic{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.aiic.cl{background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.19)}.aiic.gk{background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.15)}.aiic.gp{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15)}.aiic.mu{background:var(--gdim);border:1px solid var(--borderg)}
+.ai-t{font-weight:600;font-size:12px}.ai-st{font-size:10px;color:var(--muted)}
+.aio{background:var(--bg);border-radius:var(--rs);padding:10px;font-size:11px;color:var(--muted);line-height:1.75;white-space:pre-wrap;min-height:46px}
+.ath{display:flex;gap:4px;align-items:center}
+.ad{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:ap 1.4s ease-in-out infinite}
+.ad:nth-child(2){animation-delay:.22s}.ad:nth-child(3){animation-delay:.44s}
+@keyframes ap{0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+.ai-src{display:flex;gap:4px;margin-bottom:7px;flex-wrap:wrap}
+.asb{padding:2px 7px;border-radius:15px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid;transition:all .2s}
+.asb.cl-b{color:var(--claude);border-color:rgba(217,119,6,.19);background:rgba(217,119,6,.04)}.asb.gk-b{color:var(--grok);border-color:rgba(14,165,233,.15);background:rgba(14,165,233,.03)}.asb.gp-b{color:var(--gpt);border-color:rgba(16,185,129,.15);background:rgba(16,185,129,.03)}
+.asb:not(.act){opacity:.4}
+.tabs{display:flex;background:var(--s2);border-radius:var(--rs);padding:3px;margin-bottom:10px;gap:2px}
+.tab{flex:1;padding:5px 3px;border-radius:7px;text-align:center;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted)}
+.tab.on{background:var(--gold);color:#000}
+.chartbox{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:9px;z-index:1;position:relative}
+.pb{height:4px;background:var(--s3);border-radius:2px;overflow:hidden;margin-top:4px}
+.pf{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .5s ease}
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - var(--nav) - 100px)}
+#chat-msgs{flex:1;overflow-y:auto;padding:3px 0 4px;display:flex;flex-direction:column;gap:5px;-webkit-overflow-scrolling:touch}
+.msg{display:flex;flex-direction:column;max-width:84%;animation:mi .18s ease}
+@keyframes mi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.msg.mine{align-self:flex-end;align-items:flex-end}.msg.theirs{align-self:flex-start;align-items:flex-start}.msg.sys{align-self:center}
+.msg-n{font-size:9px;color:var(--muted);margin-bottom:2px;padding:0 2px;display:flex;align-items:center;gap:3px}
+.msg-b{padding:7px 10px;border-radius:12px;font-size:12px;line-height:1.5;word-break:break-word}
+.msg.mine .msg-b{background:linear-gradient(135deg,#1A4A2C,#1F5A34);border-bottom-right-radius:2px}
+.msg.theirs .msg-b{background:var(--s2);border-bottom-left-radius:2px}
+.msg.sys .msg-b{background:var(--gdim);color:var(--gold);font-size:10px;border-radius:15px;padding:3px 9px;border:1px solid var(--borderg)}
+.msg.ai-msg .msg-b{background:linear-gradient(135deg,rgba(212,168,67,.05),rgba(14,165,233,.03));border:1px solid var(--borderg)}
+.msg.pinned .msg-b{border:1px solid var(--borderg)}
+.msg-tm{font-size:9px;color:var(--dim);padding:1px 2px}
+.chat-bar{display:flex;align-items:flex-end;gap:5px;padding:5px 0 2px;border-top:1px solid var(--border);flex-shrink:0}
+.chat-in{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:15px;padding:7px 10px;color:var(--text);font-size:12px;outline:none;resize:none;max-height:60px;line-height:1.4}
+.chat-in:focus{border-color:var(--borderg)}
+.c-send{width:33px;height:33px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0}
+.c-send:active{transform:scale(.87)}
+.c-ai{width:31px;height:31px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;flex-shrink:0;border:1px solid var(--borderg)}
+.c-tools{display:flex;gap:4px;padding:3px 0;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.ct{flex-shrink:0;padding:3px 8px;border-radius:13px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--borderg);color:var(--gold);background:var(--gdim);white-space:nowrap}
+.mod-bar{background:var(--s2);border-bottom:1px solid var(--border);padding:5px 9px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.mdot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:bl 2s infinite;display:inline-block;margin-right:4px}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+.wcard{background:linear-gradient(135deg,#0E2A1C,#163824);border:1.5px solid var(--borderg);border-radius:var(--r);padding:16px;margin-bottom:10px;position:relative;overflow:hidden}
+.wcard::after{content:'💎';position:absolute;right:-2px;bottom:-8px;font-size:58px;opacity:.05;pointer-events:none}
+.wlb{font-size:10px;color:rgba(237,232,216,.4);letter-spacing:1px;text-transform:uppercase}
+.wbal{font-family:'Playfair Display',serif;font-size:30px;color:var(--gold);margin:4px 0 1px;letter-spacing:-1px}
+.wacts{display:flex;gap:7px;margin-top:11px}
+.wa{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(255,255,255,.04);border-radius:9px;padding:8px 4px;cursor:pointer;border:1px solid var(--border);transition:all .15s}
+.wa:active{transform:scale(.92)}
+.wa-ic{font-size:17px}.wa-lb{font-size:9px;color:var(--muted);font-weight:500}
+.tx{background:var(--s1);border:1px solid var(--border);border-radius:var(--rs);padding:9px 10px;margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.tx-ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.tx-ic.in{background:rgba(34,197,94,.1)}.tx-ic.out{background:rgba(239,68,68,.1)}
+.tx-a.in{color:var(--green);font-weight:700}.tx-a.out{color:var(--red);font-weight:700}
+.chama-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:7px;cursor:pointer;transition:all .15s}
+.chama-card:active{background:var(--s2)}
+.chama-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px}
+.chama-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold)}
+.chama-code{font-size:10px;color:var(--muted);letter-spacing:1px}
+.chama-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.cs{background:var(--s2);border-radius:6px;padding:7px;text-align:center}
+.cs-v{font-size:14px;font-weight:700}.cs-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.revenue-hero{background:linear-gradient(135deg,rgba(167,139,250,.07),rgba(212,168,67,.05));border:1px solid rgba(167,139,250,.18);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.rev-amount{font-family:'Playfair Display',serif;font-size:32px;color:var(--purple);margin:3px 0 2px}
+.gate{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);border-radius:var(--rs);padding:14px;text-align:center;margin:16px 0}
+.gate-ic{font-size:30px;margin-bottom:7px}.gate-t{font-weight:600;color:var(--red);margin-bottom:3px;font-size:13px}.gate-s{font-size:11px;color:var(--muted)}
+#lit-convo{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.lq{background:var(--s2);border-radius:9px 9px 2px 9px;padding:7px 10px;font-size:12px;align-self:flex-end;max-width:84%}
+.la{background:linear-gradient(135deg,rgba(212,168,67,.05),rgba(14,165,233,.03));border:1px solid var(--borderg);border-radius:9px 9px 9px 2px;padding:7px 10px;font-size:11px;align-self:flex-start;max-width:96%;line-height:1.75;white-space:pre-wrap}
+.lit-row{display:flex;gap:5px;align-items:flex-end}
+.lit-in{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:7px 10px;color:var(--text);font-size:12px;outline:none;resize:none;max-height:60px}
+.lit-in:focus{border-color:var(--borderg)}
+.lit-send{width:33px;height:33px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0}
+.rstar{font-size:16px;cursor:pointer;opacity:.3;transition:all .15s}.rstar.on{opacity:1}
+.ltstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.lts{background:var(--s2);border-radius:7px;padding:9px;text-align:center}
+.lts-v{font-size:17px;font-weight:700;color:var(--gold)}.lts-l{font-size:9px;color:var(--muted);margin-top:1px;text-transform:uppercase;letter-spacing:.4px}
+.topics{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.topic{padding:3px 8px;border-radius:13px;font-size:10px;border:1px solid var(--borderg);color:var(--gold);background:var(--gdim);cursor:pointer}
+.divider{height:1px;background:var(--border);margin:10px 0}
+.alert{border-radius:var(--rs);padding:8px 10px;font-size:11px;margin-bottom:8px;line-height:1.5}
+.alert.warn{background:var(--gdim);border:1px solid var(--borderg);color:var(--gold)}.alert.danger{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.15);color:var(--red)}.alert.info{background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.13);color:var(--blue)}.alert.ok{background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.13);color:var(--green)}
+.empty{text-align:center;padding:34px 13px;color:var(--muted)}
+.empty-ic{font-size:36px;margin-bottom:9px;opacity:.4}
+.empty h3{font-size:12px;color:var(--text);margin-bottom:4px}
+#toast{position:fixed;top:15px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--s3);border:1px solid var(--borderg);border-radius:23px;padding:6px 13px;font-size:11px;font-weight:500;z-index:9999;transition:transform .3s;white-space:nowrap}
+#toast.on{transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:var(--green);color:var(--green)}
+#toast.err{border-color:var(--red);color:var(--red)}
+.fab{position:fixed;bottom:calc(var(--nav)+10px);right:12px;width:44px;height:44px;border-radius:12px;background:var(--gold);color:#000;font-size:21px;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 15px rgba(212,168,67,.24);z-index:200;transition:all .2s}
+.fab:active{transform:scale(.88)}
+#upd{display:none;background:var(--gdim);border-bottom:1px solid var(--borderg);padding:6px 12px;text-align:center;font-size:11px;color:var(--gold);cursor:pointer;z-index:50;position:relative;flex-shrink:0}
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+
+<div id="onboard">
+  <div class="ob-logo"><div class="ob-orb">🌿</div><h1>myChama</h1><p>Digital Savings Platform</p><div class="ob-ver">v4.0 · Multi-Chama · Triple AI · Role Security · Earn</div></div>
+  <div class="ob-cards">
+    <div class="ob-card primary" onclick="showCreate()"><div class="ob-card-ic">🏗️</div><div class="ob-card-t">Create Chama</div><div class="ob-card-s">Start a new chama or SACCO group</div></div>
+    <div class="ob-card" onclick="showJoin()"><div class="ob-card-ic">🔑</div><div class="ob-card-t">Join Chama</div><div class="ob-card-s">Enter invite code from your admin</div></div>
+  </div>
+  <div class="ob-super" onclick="superLogin()">🔴 Super Admin Login</div>
+</div>
+
+<div id="join-screen">
+  <div class="form-box">
+    <div class="back-btn" onclick="backToOb()">← Back</div>
+    <div class="form-title">Join a Chama</div>
+    <div class="form-sub">Enter the 6-character invite code from your admin, then set up your account.</div>
+    <div class="fg"><label class="fl">Invite Code *</label><input class="fi" id="join-code" placeholder="ABC123" maxlength="6" style="letter-spacing:3px;font-size:20px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:center"></div>
+    <div class="fg"><label class="fl">Your Full Name *</label><input class="fi" id="join-name" placeholder="Jane Wanjiru"></div>
+    <div class="fg"><label class="fl">Your Phone *</label><input class="fi" id="join-phone" placeholder="0712345678" type="tel"></div>
+    <div class="fg"><label class="fl">Choose PIN (4 digits) *</label><input class="fi" id="join-pin" type="password" maxlength="4" placeholder="••••"></div>
+    <button class="btn btn-gold" onclick="joinChama()">Join Chama →</button>
+  </div>
+</div>
+
+<div id="create-screen">
+  <div class="form-box">
+    <div class="back-btn" onclick="backToOb()">← Back</div>
+    <div class="form-title">Create Chama</div>
+    <div class="form-sub">Set up your chama. You become Admin and receive an invite code to share with members.</div>
+    <div class="fg"><label class="fl">Chama / SACCO Name *</label><input class="fi" id="c-cname" placeholder="Umoja Savings Group"></div>
+    <div class="fg"><label class="fl">Your Full Name *</label><input class="fi" id="c-name" placeholder="John Kamau"></div>
+    <div class="fg"><label class="fl">Your Phone *</label><input class="fi" id="c-phone" placeholder="0712345678" type="tel"></div>
+    <div class="fg"><label class="fl">Monthly Target (KES)</label><input class="fi" id="c-target" placeholder="5000" type="number"></div>
+    <div class="fg"><label class="fl">Due Day</label><select class="fi" id="c-day"><option value="1">1st</option><option value="5" selected>5th</option><option value="10">10th</option><option value="15">15th</option><option value="25">25th</option><option value="30">30th</option></select></div>
+    <div class="fg"><label class="fl">Loan Interest Rate (%)</label><input class="fi" id="c-int" placeholder="10" type="number"></div>
+    <div class="fg"><label class="fl">Admin PIN (4 digits) *</label><input class="fi" id="c-pin" type="password" maxlength="4" placeholder="••••"></div>
+    <div class="fg"><label class="fl">Plan</label><select class="fi" id="c-plan"><option value="free">Free (up to 10 members)</option><option value="starter">Starter — KES 299/mo (30 members)</option><option value="pro">Pro — KES 799/mo (unlimited + wallets)</option></select></div>
+    <div class="alert info">💡 Start Free and upgrade anytime in Settings.</div>
+    <button class="btn btn-gold" onclick="createChama()">Create Chama & Get Code →</button>
+  </div>
+</div>
+
+<div id="lock">
+  <div class="l-top">
+    <div class="l-av" id="l-av">🌿</div>
+    <div class="l-name" id="l-name">myChama</div>
+    <div class="l-chama" id="l-chama">Enter PIN to continue</div>
+    <div id="l-role-badge" style="margin-top:5px"></div>
+  </div>
+  <div class="pdots" id="pdots"><div class="pd" id="d0"></div><div class="pd" id="d1"></div><div class="pd" id="d2"></div><div class="pd" id="d3"></div></div>
+  <div class="kpad">
+    <div class="kk" onclick="pk('1')">1</div><div class="kk" onclick="pk('2')">2<span class="ks">ABC</span></div><div class="kk" onclick="pk('3')">3<span class="ks">DEF</span></div>
+    <div class="kk" onclick="pk('4')">4<span class="ks">GHI</span></div><div class="kk" onclick="pk('5')">5<span class="ks">JKL</span></div><div class="kk" onclick="pk('6')">6<span class="ks">MNO</span></div>
+    <div class="kk" onclick="pk('7')">7<span class="ks">PQRS</span></div><div class="kk" onclick="pk('8')">8<span class="ks">TUV</span></div><div class="kk" onclick="pk('9')">9<span class="ks">WXYZ</span></div>
+    <div class="kk del" onclick="pdel()">⌫</div><div class="kk" onclick="pk('0')">0</div><div class="kk ok" onclick="psub()">✓</div>
+  </div>
+  <div class="lmsg" id="lmsg">Enter your PIN</div>
+  <div class="l-switch" id="l-switch" onclick="switchUser()" style="display:none">↩ Switch Account</div>
+</div>
+
+<div id="upd" onclick="doUpd()">🔄 Update available — tap to reload</div>
+
+<div id="app">
+  <div class="abar">
+    <div class="abar-l"><div class="abar-logo" id="abar-chama">🌿 myChama</div><div class="abar-sub" id="abar-role">Loading…</div></div>
+    <div class="abar-r"><div class="ib" onclick="go('chat')">💬<div class="ib-b" id="chat-badge">0</div></div><div class="ib" onclick="go('ai')">🤖</div><div class="ib" onclick="go('settings')">⚙️</div></div>
+  </div>
+  <div id="sub-banner"><div class="sub-i" id="sub-info">Free Plan</div><div class="sub-up" onclick="openUpgrade()">Upgrade ↑</div></div>
+  <div class="screens">
+    <div class="sc on" id="sc-home">
+      <div class="hero"><div class="hero-in"><div class="htag">Active Chama</div><div class="hname" id="d-name">My Chama</div><div class="hsub" id="d-sub">Loading…</div><div class="hcode" id="d-code" onclick="copyCode()">📋 ------</div></div></div>
+      <div class="sg"><div class="sc2"><div class="slb">Total Pot</div><div class="sv gold" id="d-pot">KES 0</div></div><div class="sc2"><div class="slb">Members</div><div class="sv" id="d-mem">0</div></div><div class="sc2"><div class="slb">This Month</div><div class="sv green" id="d-month">KES 0</div></div><div class="sc2"><div class="slb">Loans Out</div><div class="sv" id="d-loans">0</div></div></div>
+      <div class="chartbox"><div style="font-size:10px;color:var(--muted);margin-bottom:7px">6-Month Collections</div><canvas id="mchart" height="115"></canvas></div>
+      <div class="aic"><div class="aihdr"><div class="aiic mu">🔮</div><div style="flex:1"><div class="ai-t">Triple AI Insights</div><div class="ai-st">Claude · Grok · GPT-4o</div></div><button class="btn btn-out btn-sm" onclick="genInsights()">Refresh</button></div><div class="ai-src" id="ins-src"><div class="asb cl-b act" onclick="ss('ins','cl',this)">🧠 Claude</div><div class="asb gk-b" onclick="ss('ins','gk',this)">⚡ Grok</div><div class="asb gp-b" onclick="ss('ins','gp',this)">🤖 GPT</div><div class="asb" style="color:var(--muted);border-color:var(--border)" onclick="ss('ins','all',this)">⊕ All</div></div><div class="aio" id="ai-ins"><div class="ath"><div class="ad"></div><div class="ad"></div><div class="ad"></div></div></div></div>
+      <div class="sh"><div class="sh-t">Recent</div><div class="sh-a" onclick="go('funds')">All →</div></div>
+      <div id="d-recent"></div>
+    </div>
+    <div class="sc" id="sc-members"><div class="sh" style="margin-top:5px"><div class="sh-t">Members <span class="badge gold" id="mbadge">0</span></div><div class="sh-a" id="add-m-btn" onclick="openAddMember()">+ Add</div></div><div class="tabs"><div class="tab on" onclick="fmem('all',this)">All</div><div class="tab" onclick="fmem('active',this)">Active</div><div class="tab" onclick="fmem('late',this)">Late</div></div><div id="mem-list"></div></div>
+    <div class="sc" id="sc-funds"><div class="card gb" style="margin-top:5px"><div class="slb">Monthly Progress</div><div class="sv gold" id="fp-amt" style="font-size:21px">KES 0</div><div style="font-size:10px;color:var(--muted);margin-top:1px" id="fp-sub">of target</div><div class="pb"><div class="pf" id="fp-bar" style="width:0%"></div></div></div><div class="tabs"><div class="tab on" onclick="fcont('all',this)">All</div><div class="tab" onclick="fcont('completed',this)">Paid</div><div class="tab" onclick="fcont('pending',this)">Pending</div></div><div id="cont-list"></div></div>
+    <div class="sc" id="sc-loans"><div class="sg" style="margin-top:5px"><div class="sc2"><div class="slb">Outstanding</div><div class="sv red" id="l-out">KES 0</div></div><div class="sc2"><div class="slb">Recovered</div><div class="sv green" id="l-rec">KES 0</div></div></div><div class="tabs"><div class="tab on" onclick="fl('all',this)">All</div><div class="tab" onclick="fl('pending',this)">Pending</div><div class="tab" onclick="fl('active',this)">Active</div><div class="tab" onclick="fl('settled',this)">Settled</div></div><div id="loan-list"></div></div>
+    <div class="sc" id="sc-chat"><div class="mod-bar"><div><div class="mdot"></div><span style="color:var(--muted);font-size:10px" id="chat-title">Group Chat</span></div><div style="display:flex;gap:4px"><button class="btn btn-xs btn-out" onclick="chatAI()">🤖 AI</button><button class="btn btn-xs btn-s" id="mod-btn" onclick="openMod()" style="display:none">🛡️ Mod</button></div></div><div class="chat-wrap"><div id="chat-msgs"></div><div class="c-tools"><div class="ct" onclick="cq('What is our chama balance?')">💰 Balance</div><div class="ct" onclick="cq('This month summary')">📊 Summary</div><div class="ct" onclick="cq('Next contribution due?')">📅 Due</div><div class="ct" onclick="cq('Financial tip')">🎓 Tip</div><div class="ct" onclick="cq('Outstanding loans?')">🏦 Loans</div></div><div class="chat-bar"><div class="c-ai" onclick="chatAI()">🤖</div><textarea class="chat-in" id="chat-in" placeholder="Message group…" rows="1" oninput="ar(this)" onkeydown="ce(event)"></textarea><div class="c-send" onclick="sendMsg()">➤</div></div></div></div>
+    <div class="sc" id="sc-wallets"><div id="wallet-gate"></div><div id="wallet-content" style="display:none"><div class="wcard" style="margin-top:5px"><div class="wlb">My Wallet</div><div class="wbal" id="my-bal">KES 0.00</div><div style="font-size:10px;color:rgba(237,232,216,.45)" id="my-info">—</div><div class="wacts"><div class="wa" onclick="wTopup()"><div class="wa-ic">⬇️</div><div class="wa-lb">Top Up</div></div><div class="wa" onclick="wSend()"><div class="wa-ic">➤</div><div class="wa-lb">Transfer</div></div><div class="wa" onclick="go('funds')"><div class="wa-ic">💰</div><div class="wa-lb">Contribute</div></div><div class="wa" onclick="wHistory()"><div class="wa-ic">📋</div><div class="wa-lb">History</div></div></div></div><div class="sh"><div class="sh-t">Member Wallets</div></div><div id="wallet-list"></div></div></div>
+    <div class="sc" id="sc-ai"><div class="alert info" style="margin-top:5px">⚡ Add Claude, Grok & GPT-4o keys in Settings for Triple AI.</div><div class="aic"><div class="aihdr"><div class="aiic mu">📊</div><div style="flex:1"><div class="ai-t">Financial Report</div><div class="ai-st">3 AI perspectives</div></div><button class="btn btn-out btn-sm" onclick="genReport()">Generate</button></div><div class="ai-src" id="rpt-src"><div class="asb cl-b act" onclick="ss('rpt','cl',this)">🧠 Claude</div><div class="asb gk-b" onclick="ss('rpt','gk',this)">⚡ Grok</div><div class="asb gp-b" onclick="ss('rpt','gp',this)">🤖 GPT</div></div><div class="aio" id="ai-rpt">Tap Generate.</div></div><div class="aic"><div class="aihdr"><div class="aiic gk">🚨</div><div style="flex:1"><div class="ai-t">Anomaly Scanner</div><div class="ai-st">Grok risk analysis</div></div><button class="btn btn-out btn-sm" onclick="runScan()">Scan</button></div><div class="aio" id="ai-scan">Tap Scan.</div></div><div class="aic"><div class="aihdr"><div class="aiic gp">📲</div><div style="flex:1"><div class="ai-t">Nudge Engine</div><div class="ai-st">GPT-4o reminders</div></div><button class="btn btn-out btn-sm" onclick="runNudge()">Run</button></div><div class="aio" id="ai-nudge">Tap Run.</div><div id="nudge-btns" style="margin-top:7px;display:none"></div></div><div class="aic"><div class="aihdr"><div class="aiic cl">🔧</div><div style="flex:1"><div class="ai-t">Self-Diagnostics</div><div class="ai-st">Health + auto-heal</div></div><button class="btn btn-out btn-sm" onclick="runDiag()">Check</button></div><div class="aio" id="ai-diag">Tap Check.</div></div></div>
+    <div class="sc" id="sc-lit"><div class="sh" style="margin-top:5px"><div class="sh-t">Financial Literacy Agent</div><div class="sh-a" onclick="openLitStats()">Stats</div></div><div class="ltstats"><div class="lts"><div class="lts-v" id="lit-q">0</div><div class="lts-l">Questions</div></div><div class="lts"><div class="lts-v" id="lit-r">—</div><div class="lts-l">Avg ⭐</div></div><div class="lts"><div class="lts-v" id="lit-lv">1</div><div class="lts-l">Level</div></div></div><div class="topics" id="lit-topics"></div><div id="lit-convo"></div><div class="lit-row"><textarea class="lit-in" id="lit-in" placeholder="Ask about money, chamas, investing…" rows="2"></textarea><div class="lit-send" onclick="litAsk()">➤</div></div></div>
+    <div class="sc" id="sc-super"><div class="sh" style="margin-top:5px"><div class="sh-t">🔴 Super Admin Panel</div></div><div class="revenue-hero"><div class="slb">Platform Revenue (Month)</div><div class="rev-amount" id="rev-amount">KES 0</div><div style="font-size:10px;color:rgba(167,139,250,.55)" id="rev-sub">0 subscriptions</div></div><div class="sg"><div class="sc2"><div class="slb">Total Chamas</div><div class="sv purple" id="sa-chamas">0</div></div><div class="sc2"><div class="slb">Total Members</div><div class="sv" id="sa-members">0</div></div><div class="sc2"><div class="slb">Pro Plans</div><div class="sv purple" id="sa-pro">0</div></div><div class="sc2"><div class="slb">Free</div><div class="sv" id="sa-free">0</div></div></div><div class="sh"><div class="sh-t">All Chamas</div></div><div id="sa-list"></div><div class="card"><div class="slb" style="margin-bottom:9px">Platform Settings</div><div class="fg"><label class="fl">Platform Name</label><input class="fi" id="sa-pname" placeholder="myChama Platform"></div><div class="fg"><label class="fl">Super Admin PIN</label><input class="fi" type="password" maxlength="4" id="sa-spin" placeholder="••••"></div><div class="fg"><label class="fl">Starter Price (KES/mo)</label><input class="fi" type="number" id="sa-starter" placeholder="299"></div><div class="fg"><label class="fl">Pro Price (KES/mo)</label><input class="fi" type="number" id="sa-pro-price" placeholder="799"></div><div class="fg"><label class="fl">Transaction Fee (%)</label><input class="fi" type="number" id="sa-fee" placeholder="0.5" step="0.1"></div><button class="btn btn-gold" onclick="saveSuperCfg()">Save Platform Settings</button></div><div style="height:30px"></div></div>
+    <div class="sc" id="sc-settings"><div class="sh" style="margin-top:5px"><div class="sh-t">Settings</div></div><div id="settings-gate"></div><div id="settings-content"><div class="card"><div class="slb" style="margin-bottom:9px">Chama</div><div class="fg"><label class="fl">Name</label><input class="fi" id="s-name"></div><div class="fg"><label class="fl">Monthly Target (KES)</label><input class="fi" type="number" id="s-target"></div><div class="fg"><label class="fl">Due Day</label><select class="fi" id="s-day"><option value="1">1st</option><option value="5">5th</option><option value="10">10th</option><option value="15">15th</option><option value="25">25th</option><option value="30">30th</option></select></div><div class="fg"><label class="fl">Loan Interest (%)</label><input class="fi" type="number" id="s-int"></div></div><div class="card"><div class="slb" style="margin-bottom:9px">Payments</div><div class="fg"><label class="fl">IntaSend Publishable Key</label><input class="fi" id="s-is" placeholder="ISPubKey_live_..."></div><div class="fg"><label class="fl">Mode</label><select class="fi" id="s-ismode"><option value="sandbox">Sandbox (Test)</option><option value="live">Live</option></select></div><div class="alert info">💡 Use IntaSend Checkout for browser M-Pesa payments. STK Push requires backend/server.</div></div><div class="card"><div class="slb" style="margin-bottom:9px">AI API Keys</div><div class="fg"><label class="fl">🧠 Anthropic Claude</label><input class="fi" id="s-claude" placeholder="sk-ant-..."></div><div class="fg"><label class="fl">⚡ xAI Grok</label><input class="fi" id="s-grok" placeholder="xai-..."></div><div class="fg"><label class="fl">🤖 OpenAI GPT-4o</label><input class="fi" id="s-gpt" placeholder="sk-..."></div></div><div class="card"><div class="slb" style="margin-bottom:9px">Security</div><div class="fg"><label class="fl">New PIN (4 digits)</label><input class="fi" type="password" maxlength="4" id="s-pin" placeholder="••••"></div></div><div class="card"><div class="slb" style="margin-bottom:9px">Your Plan</div><div id="plan-display"></div><button class="btn btn-purple" onclick="openUpgrade()">⬆️ Upgrade Plan</button></div><button class="btn btn-gold" style="margin-top:5px" onclick="saveSettings()">💾 Save Settings</button><div style="height:9px"></div><div class="card"><div class="slb" style="margin-bottom:9px">Data</div><div class="brow"><button class="btn btn-out btn-sm" onclick="exportCSV()">📊 CSV</button><button class="btn btn-out btn-sm" onclick="backupJSON()">💾 Backup</button><button class="btn btn-out btn-sm" onclick="importJSON()">📥 Import</button></div></div><div style="height:7px"></div><button class="btn btn-r" onclick="confirmReset()">🗑️ Reset Chama Data</button><div style="height:7px"></div><button class="btn btn-s" onclick="switchUser()">↩ Switch / Leave Chama</button><div style="height:40px"></div></div></div>
+  </div>
+  <nav class="bnav">
+    <div class="ni on" id="ni-home" onclick="go('home')"><div class="ni-ic">🏠</div><div class="ni-lb">Home</div></div>
+    <div class="ni" id="ni-members" onclick="go('members')"><div class="ni-ic">👥</div><div class="ni-lb">Members</div></div>
+    <div class="ni" id="ni-funds" onclick="go('funds')"><div class="ni-ic">💰</div><div class="ni-lb">Funds</div></div>
+    <div class="ni" id="ni-wallets" onclick="go('wallets')"><div class="ni-ic">👛</div><div class="ni-lb">Wallets</div></div>
+    <div class="ni" id="ni-chat" onclick="go('chat')"><div class="ni-ic">💬</div><div class="ni-lb">Chat</div><div class="nbadge" id="chat-nb">0</div></div>
+    <div class="ni" id="ni-lit" onclick="go('lit')"><div class="ni-ic">🎓</div><div class="ni-lb">Learn</div></div>
+    <div class="ni" id="ni-ai" onclick="go('ai')"><div class="ni-ic">🤖</div><div class="ni-lb">AI Lab</div><div class="nbadge" id="ai-nb">!</div></div>
+  </nav>
+</div>
+
+<div class="fab" id="fab" onclick="fabDo()">+</div>
+<div class="mo" id="mo" onclick="mcl(event)"><div class="mb" id="mb"></div></div>
+<div id="toast"></div>
+<input type="file" id="f-import" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+const VER='4.0.0';
+const DEFAULT_SUPER='9999';
+const PLANS={free:{name:'Free',price:0,maxMembers:10,ai:'basic',wallets:false},starter:{name:'Starter',price:299,maxMembers:30,ai:'single',wallets:false},pro:{name:'Pro',price:799,maxMembers:999,ai:'triple',wallets:true}};
+const LIT_TOPICS=['M-Pesa hacks','Chama investing','Emergency fund','Inflation KE','Crypto basics','50/30/20 budget','NSE stocks','Loan management','SACCO benefits','Savings goals'];
+let DB,scr='home',pin='',mCh=null,mF='all',cF='all',lF='all',aiCache={},litSt={q:0,total:0,rated:0,lv:1};
+let SESSION={chamaId:null,userId:null,role:null,name:'',plan:'free',isSuper:false,userPin:''};
+const ROLES=['member','treasurer','admin','super'];
+function canAccess(r){return ROLES.indexOf(SESSION.role)>=ROLES.indexOf(r)||SESSION.isSuper;}
+function openDB(){return new Promise((ok,fl)=>{const r=indexedDB.open('mychama_v4',1);r.onupgradeneeded=e=>{const d=e.target.result;['platform','chamas','users','members','contributions','loans','chat','wallets','wallet_tx','lit_memory'].forEach(s=>{if(!d.objectStoreNames.contains(s))d.createObjectStore(s,s==='platform'||s==='chamas'||s==='users'?{keyPath:'id'}:{keyPath:'id',autoIncrement:true});});};r.onsuccess=e=>{DB=e.target.result;ok()};r.onerror=()=>fl(r.error);})}
+const tx=(s,m='readonly')=>DB.transaction(s,m).objectStore(s);
+const dbG=(s,k)=>new Promise((ok,f)=>{const r=tx(s).get(k);r.onsuccess=()=>ok(r.result);r.onerror=e=>{e.preventDefault();f(r.error||e);};});
+const dbA=(s,cid)=>new Promise((ok)=>{const r=tx(s).getAll();r.onsuccess=()=>ok(cid?(r.result||[]).filter(x=>x.chamaId===cid):r.result||[]);r.onerror=()=>ok([])});
+const dbP=(s,d)=>new Promise((ok,f)=>{const r=tx(s,'readwrite').put(d);r.onsuccess=()=>ok(r.result);r.onerror=e=>{e.preventDefault();f(r.error||e);};});
+const dbD=(s,k)=>new Promise((ok,f)=>{const r=tx(s,'readwrite').delete(k);r.onsuccess=ok;r.onerror=e=>{e.preventDefault();f(r.error||e);};});
+const dbAll=()=>new Promise((ok)=>{const r=DB.transaction('chamas').objectStore('chamas').getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>ok([])});
+const dbAllUsers=()=>new Promise((ok)=>{const r=DB.transaction('users').objectStore('users').getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>ok([])});
+const dbAllMembers=()=>new Promise((ok)=>{const r=DB.transaction('members').objectStore('members').getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>ok([])});
+async function dbClearChama(cid){const stores=['members','contributions','loans','chat','wallets','wallet_tx','lit_memory'];for(const s of stores){const all=await dbA(s,cid);for(const rec of all)await dbD(s,rec.id);}}
+
+// HELPERS
+const ksh=n=>'KES '+(n||0).toLocaleString('en-KE',{maximumFractionDigits:0});
+const fdt=d=>new Date(d).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'});
+const ini=n=>(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const now=()=>new Date();
+const v=id=>document.getElementById(id)?.value?.trim()||'';
+const sv=(id,val)=>{const e=document.getElementById(id);if(e)e.value=val};
+function genCode(){return Math.random().toString(36).substring(2,8).toUpperCase();}
+let tT;function toast(msg,type=''){const t=document.getElementById('toast');clearTimeout(tT);t.textContent=msg;t.className=type?`on ${type}`:'on';tT=setTimeout(()=>t.className=type||'',3200);}
+function showModal(html){document.getElementById('mb').innerHTML=html;document.getElementById('mo').classList.add('open')}
+function mcl(e){if(!e||e.target===document.getElementById('mo'))document.getElementById('mo').classList.remove('open')}
+function ar(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,60)+'px'}
+function ce(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function roleIcon(r){return r==='super'?'🔴':r==='admin'?'🟠':r==='treasurer'?'🟡':'🟢';}
+
+// ONBOARDING
+function showCreate(){document.getElementById('onboard').style.display='none';document.getElementById('create-screen').style.display='flex';}
+function showJoin(){document.getElementById('onboard').style.display='none';document.getElementById('join-screen').style.display='flex';}
+function backToOb(){document.getElementById('create-screen').style.display='none';document.getElementById('join-screen').style.display='none';document.getElementById('onboard').style.display='flex';}
+async function superLogin(){let stored=DEFAULT_SUPER;try{const s=await dbG('platform','super_settings');if(s?.superPin)stored=s.superPin;}catch(e){}const p=prompt('Super Admin PIN:');if(p===stored){SESSION={chamaId:'super',role:'super',name:'Super Admin',isSuper:true,userPin:stored};showApp(true);}else toast('Wrong PIN','err');}
+
+// CREATE CHAMA
+async function createChama(){try{
+  const cName=v('c-cname'),name=v('c-name'),phone=v('c-phone'),pin4=v('c-pin');
+  if(!cName||!name||!phone||pin4.length<4){toast('Fill all required fields','err');return;}
+  const cid='CH'+genCode(),code=genCode(),plan=v('c-plan')||'free';
+  const cfg={id:cid,chamaId:cid,code,chamaName:cName,monthlyTarget:parseFloat(v('c-target'))||5000,conDay:parseInt(v('c-day'))||5,interest:parseFloat(v('c-int'))||10,plan,createdAt:new Date().toISOString(),isPub:'',isMode:'sandbox',claude:'',grok:'',gpt:''};
+  await dbP('chamas',cfg);
+  const uid='U'+genCode();
+  await dbP('users',{id:uid,chamaId:cid,name,phone,role:'admin',pin:pin4,joinedAt:new Date().toISOString(),status:'active'});
+  await dbP('members',{chamaId:cid,memberId:uid,name,phone,role:'admin',joinDate:new Date().toISOString().split('T')[0],status:'active'});
+  await dbP('wallets',{chamaId:cid,memberId:uid,balance:0,phone,name});
+  showModal(`<div class="mh"></div><div class="mt">🎉 Chama Created!</div>
+    <div class="alert ok">${cName} is ready!</div>
+    <div style="text-align:center;padding:16px 0">
+      <div style="font-family:'Playfair Display',serif;font-size:44px;color:var(--gold);letter-spacing:6px;font-weight:700">${code}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Invite Code — share with members</div>
+    </div>
+    <div class="alert warn">📸 Screenshot this code! Members enter it on their device to join.</div>
+    <button class="btn btn-gold" onclick="mcl();loadSession('${cid}','${uid}')">Enter myChama →</button>`);
+} catch(e){toast('Failed: '+e.message,'err');console.error(e);}
+}
+
+// JOIN CHAMA
+async function joinChama(){try{
+  const code=v('join-code').toUpperCase(),name=v('join-name'),phone=v('join-phone'),pin4=v('join-pin');
+  if(!code||!name||!phone||pin4.length<4){toast('Fill all fields','err');return;}
+  const all=await dbAll();
+  const chama=all.find(c=>c.code===code);
+  if(!chama){toast('Invalid invite code','err');return;}
+  const existing=await dbA('members',chama.id);
+  const limit=PLANS[chama.plan]?.maxMembers||10;
+  if(existing.filter(m=>m.status==='active').length>=limit){toast(`Chama full — ${limit} member limit on ${chama.plan} plan`,'err');return;}
+  const uid='U'+genCode();
+  await dbP('users',{id:uid,chamaId:chama.id,name,phone,role:'member',pin:pin4,joinedAt:new Date().toISOString(),status:'active'});
+  await dbP('members',{chamaId:chama.id,memberId:uid,name,phone,role:'member',joinDate:new Date().toISOString().split('T')[0],status:'active'});
+  await dbP('wallets',{chamaId:chama.id,memberId:uid,balance:0,phone,name});
+  toast(`Joined ${chama.chamaName} ✓`,'ok');
+  setTimeout(()=>loadSession(chama.id,uid),500);
+}catch(err){toast('Error: '+err.message,'err');console.error('joinChama error:',err);}}
+
+// SESSION + LOCK
+async function loadSession(chamaId,userId){try{
+  const [chama,user]=await Promise.all([dbG('chamas',chamaId),dbG('users',userId)]);
+  if(!chama||!user){toast('Session error — try again','err');return;}
+  SESSION={chamaId,userId,role:user.role,name:user.name,plan:chama.plan,isSuper:false,userPin:user.pin};
+  localStorage.setItem('mc4_sess',JSON.stringify({chamaId,userId}));
+  document.getElementById('onboard').style.display='none';
+  document.getElementById('create-screen').style.display='none';
+  document.getElementById('join-screen').style.display='none';
+  document.getElementById('lock').style.display='flex';
+  document.getElementById('l-name').textContent=user.name;
+  document.getElementById('l-chama').textContent=chama.chamaName;
+  document.getElementById('l-av').textContent=ini(user.name);
+  document.getElementById('l-switch').style.display='block';
+  document.getElementById('l-role-badge').innerHTML=`<div class="l-role rl-${user.role}">${roleIcon(user.role)} ${user.role}</div>`;
+}catch(err){toast('Session error: '+err.message,'err');console.error('loadSession error:',err);}
+}
+function pk(k){if(pin.length>=4)return;pin+=k;dsync();if(pin.length===4)setTimeout(psub,180)}
+function pdel(){pin=pin.slice(0,-1);dsync()}
+function dsync(){for(let i=0;i<4;i++)document.getElementById('d'+i).classList.toggle('on',i<pin.length)}
+function psub(){const m=document.getElementById('lmsg');if(SESSION.isSuper||pin===SESSION.userPin){document.getElementById('lock').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('fab').style.display='flex';initApp();}else{pin='';dsync();const pd=document.getElementById('pdots');pd.classList.add('shk');setTimeout(()=>pd.classList.remove('shk'),300);m.textContent='Wrong PIN ❌';m.style.color='var(--red)';setTimeout(()=>{m.textContent='Enter your PIN';m.style.color=''},2000);}}
+function switchUser(){SESSION={};localStorage.removeItem('mc4_sess');location.reload();}
+
+// NAV + APP INIT
+function go(s){document.querySelectorAll('.sc').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.ni').forEach(x=>x.classList.remove('on'));document.getElementById('sc-'+s)?.classList.add('on');document.getElementById('ni-'+s)?.classList.add('on');scr=s;document.getElementById('fab').style.display=['home','members','funds','loans'].includes(s)?'flex':'none';if(s==='settings'){popSettings();applyGates();}if(s==='members')renderMembers();if(s==='funds')renderFunds();if(s==='loans')renderLoans();if(s==='wallets')renderWallets();if(s==='chat')initChat();if(s==='lit')initLit();if(s==='home')refreshDash();if(s==='super')renderSuper();}
+function fabDo(){if(scr==='members')openAddMember();else if(scr==='loans')openAddLoan();else openAddContrib();}
+function showApp(isSuper=false){document.getElementById('onboard').style.display='none';document.getElementById('lock').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('fab').style.display='flex';if(isSuper){document.getElementById('abar-chama').textContent='🔴 Super Admin';document.getElementById('abar-role').textContent='Platform Owner';const bn=document.getElementById('sub-banner');bn.style.display='none';go('super');return;}initApp();}
+async function initApp(){const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);SESSION.plan=chama?.plan||'free';document.getElementById('abar-chama').textContent='🌿 '+(chama?.chamaName||'myChama');document.getElementById('abar-role').textContent=roleIcon(SESSION.role)+' '+SESSION.role.charAt(0).toUpperCase()+SESSION.role.slice(1);updateBanner(chama);applyGates();refreshDash();startSched();}
+function updateBanner(chama){const plan=chama?.plan||'free';const b=document.getElementById('sub-banner');if(plan==='pro'){b.style.display='none';return;}b.style.display='flex';document.getElementById('sub-info').innerHTML=`<span class="plan-badge plan-${plan}">${PLANS[plan].name}</span> plan`;}
+function applyGates(){
+  const sg=document.getElementById('settings-gate'),sc=document.getElementById('settings-content');
+  if(!canAccess('treasurer')){sg.innerHTML='<div class="gate"><div class="gate-ic">🔒</div><div class="gate-t">Access Restricted</div><div class="gate-s">Treasurer or Admin access required.</div></div>';sc.style.display='none';}else{sg.innerHTML='';sc.style.display='block';}
+  const wg=document.getElementById('wallet-gate'),wc=document.getElementById('wallet-content');
+  if(SESSION.plan==='free'||SESSION.plan==='starter'){wg.innerHTML='<div class="gate" style="margin-top:9px"><div class="gate-ic">💎</div><div class="gate-t">Wallets — Pro Plan Only</div><div class="gate-s">Upgrade to Pro (KES 799/mo) for personal wallets and peer transfers.</div><button class="btn btn-purple" style="margin-top:11px" onclick="openUpgrade()">Upgrade to Pro →</button></div>';wc.style.display='none';}else{wg.innerHTML='';wc.style.display='block';}
+  document.getElementById('mod-btn').style.display=canAccess('admin')?'flex':'none';
+  document.getElementById('add-m-btn').style.display=canAccess('admin')?'block':'none';
+}
+
+// UPGRADE
+function openUpgrade(){showModal(`<div class="mh"></div><div class="mt">Choose Plan</div>
+  <div class="card" style="margin-bottom:7px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px"><div style="font-weight:700">🆓 Free</div><span class="plan-badge plan-free">Always free</span></div><div style="font-size:11px;color:var(--muted)">10 members · Basic AI · No wallets</div></div>
+  <div class="card gb" style="margin-bottom:7px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px"><div style="font-weight:700">⭐ Starter</div><div style="color:var(--gold);font-weight:700">KES 299/mo</div></div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">30 members · Full single AI · Priority support</div><button class="btn btn-out btn-sm" onclick="upgradePlan('starter')">Upgrade to Starter</button></div>
+  <div class="card" style="background:linear-gradient(135deg,rgba(167,139,250,.07),rgba(212,168,67,.04));border-color:rgba(167,139,250,.19);margin-bottom:7px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px"><div style="font-weight:700">💎 Pro</div><div style="color:var(--purple);font-weight:700">KES 799/mo</div></div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">Unlimited members · Triple AI (Claude+Grok+GPT) · Personal wallets · Peer transfers</div><button class="btn btn-purple btn-sm" onclick="upgradePlan('pro')">Upgrade to Pro →</button></div>
+  <div class="alert info">💡 Pay via M-Pesa. WhatsApp: +254 700 000000 for manual activation.</div>`);}
+async function upgradePlan(plan){if(!canAccess('admin')){toast('Admin access required','err');return;}const chama=await dbG('chamas',SESSION.chamaId);chama.plan=plan;SESSION.plan=plan;await dbP('chamas',chama);mcl();toast(`Upgraded to ${PLANS[plan].name} ✓`,'ok');updateBanner(chama);applyGates();refreshDash();}
+
+// DASHBOARD
+async function refreshDash(){const cid=SESSION.chamaId;const [chama,M,C,L]=await Promise.all([dbG('chamas',cid),dbA('members',cid),dbA('contributions',cid),dbA('loans',cid)]);const n=now(),paid=C.filter(c=>c.status==='completed');const pot=paid.reduce((s,c)=>s+c.amount,0);const act=M.filter(m=>m.status==='active');const thisM=paid.filter(c=>{const d=new Date(c.date);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()});document.getElementById('d-name').textContent=chama?.chamaName||'My Chama';document.getElementById('d-sub').textContent=`${act.length} members · Due ${chama?.conDay||5}th · ${PLANS[chama?.plan||'free'].name}`;document.getElementById('d-code').textContent=`📋 ${chama?.code||'------'}`;document.getElementById('d-pot').textContent=ksh(pot);document.getElementById('d-mem').textContent=act.length;document.getElementById('d-month').textContent=ksh(thisM.reduce((s,c)=>s+c.amount,0));document.getElementById('d-loans').textContent=L.filter(l=>l.status==='active').length;renderChart(C);renderRecent(C,M);genInsights();}
+function copyCode(){const t=document.getElementById('d-code').textContent.replace('📋 ','');navigator.clipboard?.writeText(t).then(()=>toast('Code copied: '+t,'ok')).catch(()=>toast('Code: '+t));}
+function renderChart(C){const ctx=document.getElementById('mchart').getContext('2d');const lb=[],dt=[];for(let i=5;i>=0;i--){const d=new Date();d.setMonth(d.getMonth()-i);lb.push(d.toLocaleDateString('en-KE',{month:'short'}));dt.push(C.filter(c=>{const cd=new Date(c.date);return cd.getMonth()===d.getMonth()&&cd.getFullYear()===d.getFullYear()&&c.status==='completed'}).reduce((s,c)=>s+c.amount,0));}if(mCh)mCh.destroy();mCh=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{data:dt,backgroundColor:'rgba(212,168,67,.28)',borderColor:'rgba(212,168,67,.7)',borderWidth:2,borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.02)'},ticks:{color:'#5A7A68',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.02)'},ticks:{color:'#5A7A68',font:{size:10},callback:v=>'K'+(v/1000|0)}}}}});}
+async function renderRecent(C,M){const el=document.getElementById('d-recent');const list=[...C].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ic">💸</div><h3>No transactions yet</h3></div>';return;}el.innerHTML=list.map(c=>{const m=M.find(x=>x.memberId===c.memberId);return `<div class="li"><div class="av">${m?ini(m.name):'?'}</div><div class="li-i"><div class="li-n">${m?m.name:'Unknown'}</div><div class="li-s">${fdt(c.date)}</div></div><div class="li-r"><div style="font-weight:700;font-size:12px;color:${c.status==='completed'?'var(--green)':'var(--gold)'}">${ksh(c.amount)}</div><span class="badge ${c.status==='completed'?'g':'gold'}" style="margin-top:1px">${c.status}</span></div></div>`;}).join('');}
+
+// MEMBERS
+async function renderMembers(){const cid=SESSION.chamaId;const [M,C]=await Promise.all([dbA('members',cid),dbA('contributions',cid)]);const n=now(),pIds=C.filter(c=>{const d=new Date(c.date);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()&&c.status==='completed'}).map(c=>c.memberId);document.getElementById('mbadge').textContent=M.filter(m=>m.status==='active').length;let list=mF==='all'?M:mF==='active'?M.filter(m=>m.status==='active'):M.filter(m=>m.status==='active'&&!pIds.includes(m.memberId));const el=document.getElementById('mem-list');if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ic">👥</div><h3>No members</h3></div>';return;}el.innerHTML=list.map(m=>{const paid=pIds.includes(m.memberId);const tot=C.filter(c=>c.memberId===m.memberId&&c.status==='completed').reduce((s,c)=>s+c.amount,0);return `<div class="li" onclick="viewMember('${m.id}')"><div class="av">${ini(m.name)}</div><div class="li-i"><div class="li-n">${m.name}</div><div class="li-s">${m.phone} · ${ksh(tot)}</div></div><div class="li-r"><span class="badge ${paid?'g':'r'}">${paid?'Paid':'Unpaid'}</span><div class="rpill ${m.role||'member'}" style="margin-top:3px">${roleIcon(m.role||'member')} ${m.role||'member'}</div></div></div>`;}).join('');}
+function fmem(f,el){mF=f;document.querySelectorAll('#sc-members .tab').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderMembers();}
+function openAddMember(){if(!canAccess('admin')){toast('Admin access required','err');return;}showModal(`<div class="mh"></div><div class="mt">Add Member</div>
+  <div class="alert info">💡 Members can also self-join using the invite code shown on Home screen.</div>
+  <div class="fg"><label class="fl">Full Name *</label><input class="fi" id="mn" placeholder="Jane Wanjiru"></div>
+  <div class="fg"><label class="fl">Phone *</label><input class="fi" id="mp" placeholder="0712345678" type="tel"></div>
+  <div class="fg"><label class="fl">Role</label><select class="fi" id="mr"><option value="member">🟢 Member</option><option value="treasurer">🟡 Treasurer</option><option value="admin">🟠 Admin</option></select></div>
+  <div class="fg"><label class="fl">Temporary PIN</label><input class="fi" id="mpin" type="password" maxlength="4" placeholder="1234 (they can change)"></div>
+  <button class="btn btn-gold" onclick="saveMember()">Add Member</button>`);}
+async function saveMember(){if(!canAccess('admin')){toast('Admin access required','err');return;}const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);const existing=await dbA('members',cid);const limit=PLANS[chama.plan]?.maxMembers||10;if(existing.filter(m=>m.status==='active').length>=limit){toast(`Limit reached (${limit}). Upgrade plan.`,'err');return;}const name=v('mn'),phone=v('mp');if(!name||!phone){toast('Name & phone required','err');return;}const uid='U'+genCode(),role=v('mr')||'member',pin4=v('mpin')||'1234';await dbP('users',{id:uid,chamaId:cid,name,phone,role,pin:pin4,joinedAt:new Date().toISOString(),status:'active'});await dbP('members',{chamaId:cid,memberId:uid,name,phone,role,joinDate:new Date().toISOString().split('T')[0],status:'active'});await dbP('wallets',{chamaId:cid,memberId:uid,balance:0,phone,name});mcl();renderMembers();refreshDash();toast(`Added ${name} (PIN: ${pin4}) ✓`,'ok');}
+async function viewMember(id){if(!canAccess('treasurer')){toast('Treasurer access required','err');return;}const cid=SESSION.chamaId;const [M,C,L,W]=await Promise.all([dbA('members',cid),dbA('contributions',cid),dbA('loans',cid),dbA('wallets',cid)]);const m=M.find(x=>x.id==id);if(!m)return;const mId=m.memberId;const tot=C.filter(c=>c.memberId===mId&&c.status==='completed').reduce((s,c)=>s+c.amount,0);const debt=L.filter(l=>l.memberId===mId&&l.status==='active').reduce((s,l)=>s+(l.amount-(l.repaid||0)),0);const w=W.find(x=>x.memberId===mId)||{balance:0};showModal(`<div class="mh"></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="av" style="width:42px;height:42px;font-size:14px;border-radius:11px">${ini(m.name)}</div><div><div class="mt" style="margin-bottom:1px">${m.name}</div><div class="rpill ${m.role||'member'}">${roleIcon(m.role||'member')} ${m.role||'member'}</div><div style="color:var(--muted);font-size:10px;margin-top:2px">${m.phone}</div></div></div><div class="sg"><div class="sc2"><div class="slb">Contributed</div><div class="sv gold">${ksh(tot)}</div></div><div class="sc2"><div class="slb">Wallet</div><div class="sv blue">${ksh(w.balance)}</div></div><div class="sc2"><div class="slb">Loan Bal</div><div class="sv red">${ksh(debt)}</div></div><div class="sc2"><div class="slb">Since</div><div class="sv" style="font-size:10px">${fdt(m.joinDate)}</div></div></div><div class="brow"><button class="btn btn-out btn-sm" onclick="mcl();openAddContrib('${mId}')">+ Contrib</button><button class="btn btn-out btn-sm" onclick="wa('${m.phone}','${m.name}')">📲 WA</button>${canAccess('admin')?`<button class="btn btn-out btn-sm" onclick="changeRole('${id}')">🔄 Role</button><button class="btn btn-r btn-sm" onclick="delMem('${id}')">Remove</button>`:''}</div>`);}
+async function changeRole(id){if(!canAccess('admin')){toast('Admin required','err');return;}showModal(`<div class="mh"></div><div class="mt">Change Role</div><div class="fg"><label class="fl">New Role</label><select class="fi" id="nr"><option value="member">🟢 Member</option><option value="treasurer">🟡 Treasurer</option><option value="admin">🟠 Admin</option></select></div><button class="btn btn-gold" onclick="saveRole('${id}')">Update</button>`);}
+async function saveRole(id){const nr=v('nr');const cid=SESSION.chamaId;const M=await dbA('members',cid);const m=M.find(x=>x.id==id);if(m){m.role=nr;await dbP('members',m);}const U=await dbG('users',m?.memberId);if(U){U.role=nr;await dbP('users',U);}mcl();renderMembers();toast('Role updated ✓','ok');}
+async function delMem(id){if(!canAccess('admin')){toast('Admin required','err');return;}if(!confirm('Remove member?'))return;await dbD('members',id);mcl();renderMembers();toast('Removed','ok');}
+function wa(phone,name){const c=phone.replace(/^0/,'254').replace(/\D/g,'');window.open(`https://wa.me/${c}?text=${encodeURIComponent('Hello '+name+', message from your chama.')}`,'_blank');}
+
+// CONTRIBUTIONS — IntaSend Checkout (browser-safe)
+async function renderFunds(){const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);const [M,C]=await Promise.all([dbA('members',cid),dbA('contributions',cid)]);const n=now(),tM=C.filter(c=>{const d=new Date(c.date);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()&&c.status==='completed'});const mT=tM.reduce((s,c)=>s+c.amount,0),tgt=(chama?.monthlyTarget||5000)*M.filter(m=>m.status==='active').length;const pct=tgt?Math.min(100,(mT/tgt)*100):0;document.getElementById('fp-amt').textContent=ksh(mT);document.getElementById('fp-sub').textContent=`of ${ksh(tgt)} (${pct.toFixed(0)}%)`;document.getElementById('fp-bar').style.width=pct+'%';let list=[...C].sort((a,b)=>new Date(b.date)-new Date(a.date));if(cF==='completed')list=list.filter(c=>c.status==='completed');if(cF==='pending')list=list.filter(c=>c.status!=='completed');const el=document.getElementById('cont-list');if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ic">💰</div><h3>No contributions</h3></div>';return;}el.innerHTML=list.map(c=>{const m=M.find(x=>x.memberId===c.memberId);return `<div class="li" onclick="viewCont(${c.id})"><div class="av">${m?ini(m.name):'?'}</div><div class="li-i"><div class="li-n">${m?m.name:'Unknown'}</div><div class="li-s">${fdt(c.date)} · ${c.method||'Manual'}</div></div><div class="li-r"><div style="font-weight:700;font-size:12px;color:${c.status==='completed'?'var(--green)':'var(--gold)'}">${ksh(c.amount)}</div><span class="badge ${c.status==='completed'?'g':'gold'}" style="margin-top:1px">${c.status}</span></div></div>`;}).join('');}
+function fcont(f,el){cF=f;document.querySelectorAll('#sc-funds .tab').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderFunds();}
+async function openAddContrib(preMId=null){if(!canAccess('treasurer')){toast('Treasurer access required','err');return;}const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);const M=await dbA('members',cid);showModal(`<div class="mh"></div><div class="mt">Record Contribution</div>
+  <div class="fg"><label class="fl">Member *</label><select class="fi" id="cm"><option value="">Select…</option>${M.filter(m=>m.status==='active').map(m=>`<option value="${m.memberId}"${m.memberId===preMId?' selected':''}>${m.name}</option>`).join('')}</select></div>
+  <div class="fg"><label class="fl">Amount (KES) *</label><input class="fi" type="number" id="ca" placeholder="${chama?.monthlyTarget||1000}"></div>
+  <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="cd" value="${new Date().toISOString().split('T')[0]}"></div>
+  <div class="alert warn">💡 <strong>STK Push fix:</strong> Direct STK Push from browser is blocked by M-Pesa (CORS). Use the Checkout link which opens M-Pesa's secure hosted page, or record cash payments directly.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+    <button class="btn btn-s" onclick="doContrib('cash')">💵 Cash / Manual</button>
+    <button class="btn btn-gold" onclick="doContrib('checkout')">💳 M-Pesa Link</button>
+  </div>`);}
+async function doContrib(mode){if(!canAccess('treasurer')){toast('Treasurer access required','err');return;}const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);const memberId=v('cm'),amount=parseFloat(v('ca')),date=v('cd');if(!memberId||!amount){toast('Select member & amount','err');return;}if(mode==='checkout'){if(!chama?.isPub){toast('Add IntaSend Publishable Key in Settings first','err');return;}const base=chama.isMode==='live'?'https://payment.intasend.com':'https://sandbox.intasend.com';const ref=`CHM-${cid.slice(-4)}-${memberId.slice(-4)}-${Date.now()}`;const url=`${base}/checkout/?amount=${amount}&currency=KES&api_ref=${ref}&redirect_url=${encodeURIComponent(window.location.href)}`;window.open(url,'_blank');await dbP('contributions',{chamaId:cid,memberId,amount,date,method:'mpesa_checkout',status:'pending',ref});mcl();renderFunds();toast('M-Pesa page opened — mark paid after confirmation','ok');return;}await dbP('contributions',{chamaId:cid,memberId,amount,date,method:'cash',status:'completed'});mcl();renderFunds();refreshDash();toast('Recorded ✓','ok');}
+async function viewCont(id){const cid=SESSION.chamaId;const [C,M]=await Promise.all([dbA('contributions',cid),dbA('members',cid)]);const c=C.find(x=>x.id===id);if(!c)return;const m=M.find(x=>x.memberId===c.memberId);showModal(`<div class="mh"></div><div class="mt">Contribution</div><div class="sg"><div class="sc2"><div class="slb">Member</div><div class="sv" style="font-size:11px">${m?.name||'?'}</div></div><div class="sc2"><div class="slb">Amount</div><div class="sv gold">${ksh(c.amount)}</div></div><div class="sc2"><div class="slb">Date</div><div class="sv" style="font-size:10px">${fdt(c.date)}</div></div><div class="sc2"><div class="slb">Status</div><div><span class="badge ${c.status==='completed'?'g':'gold'}">${c.status}</span></div></div></div>${c.status==='pending'&&canAccess('treasurer')?`<button class="btn btn-gold btn-sm" style="margin-bottom:6px" onclick="markPaid(${id})">✓ Mark as Paid</button>`:''} ${canAccess('treasurer')?`<button class="btn btn-r btn-sm" onclick="dbD('contributions',${id}).then(()=>{mcl();renderFunds();refreshDash();toast('Deleted')})">Delete</button>`:''}`);}
+async function markPaid(id){const all=await dbA('contributions',SESSION.chamaId);const c=all.find(x=>x.id===id);if(c){c.status='completed';await dbP('contributions',c);}mcl();renderFunds();refreshDash();toast('Marked paid ✓','ok');}
+
+// LOANS
+async function renderLoans(){const cid=SESSION.chamaId;const [M,L]=await Promise.all([dbA('members',cid),dbA('loans',cid)]);document.getElementById('l-out').textContent=ksh(L.filter(l=>l.status==='active').reduce((s,l)=>s+(l.amount-(l.repaid||0)),0));document.getElementById('l-rec').textContent=ksh(L.filter(l=>l.status==='settled').reduce((s,l)=>s+l.amount,0));let list=[...L].sort((a,b)=>new Date(b.requestDate)-new Date(a.requestDate));if(lF!=='all')list=list.filter(l=>l.status===lF);const el=document.getElementById('loan-list');if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ic">🏦</div><h3>No loans</h3></div>';return;}el.innerHTML=list.map(l=>{const m=M.find(x=>x.memberId===l.memberId);const bal=l.amount-(l.repaid||0);const pct=l.totalDue?Math.min(100,((l.repaid||0)/l.totalDue)*100):0;return `<div class="li" onclick="viewLoan(${l.id})"><div class="av">🏦</div><div class="li-i"><div class="li-n">${m?.name||'?'}</div><div class="li-s">${l.purpose||'General'}</div><div class="pb" style="margin-top:3px"><div class="pf" style="width:${pct}%"></div></div></div><div class="li-r"><div style="font-weight:700;font-size:12px;color:${l.status==='active'?'var(--red)':'var(--green)'}">${ksh(bal)}</div><span class="badge ${l.status==='active'?'r':l.status==='pending'?'gold':'g'}" style="margin-top:1px">${l.status}</span></div></div>`;}).join('');}
+function fl(f,el){lF=f;document.querySelectorAll('#sc-loans .tab').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderLoans();}
+async function openAddLoan(){if(!canAccess('treasurer')){toast('Treasurer access required','err');return;}const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);const M=await dbA('members',cid);showModal(`<div class="mh"></div><div class="mt">New Loan Request</div><div class="fg"><label class="fl">Member *</label><select class="fi" id="lm"><option value="">Select…</option>${M.filter(m=>m.status==='active').map(m=>`<option value="${m.memberId}">${m.name}</option>`).join('')}</select></div><div class="fg"><label class="fl">Amount (KES) *</label><input class="fi" type="number" id="la" placeholder="10000"></div><div class="fg"><label class="fl">Purpose</label><input class="fi" id="lp" placeholder="Business, Emergency…"></div><div class="fg"><label class="fl">Due Date</label><input class="fi" type="date" id="ld" value="${new Date(Date.now()+30*864e5).toISOString().split('T')[0]}"></div><div class="alert warn">Interest: ${chama?.interest||10}%</div><button class="btn btn-gold" onclick="saveLoan()">Submit Loan</button>`);}
+async function saveLoan(){if(!canAccess('treasurer')){toast('Treasurer access required','err');return;}const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);const memberId=v('lm'),amount=parseFloat(v('la'));if(!memberId||!amount){toast('Fill fields','err');return;}const int=(amount*(chama?.interest||10))/100;await dbP('loans',{chamaId:cid,memberId,amount,purpose:v('lp'),dueDate:v('ld'),interest:int,totalDue:amount+int,repaid:0,requestDate:new Date().toISOString().split('T')[0],status:'pending'});mcl();renderLoans();toast('Loan submitted ✓','ok');}
+async function viewLoan(id){if(!canAccess('treasurer')){toast('Treasurer access required','err');return;}const cid=SESSION.chamaId;const [L,M]=await Promise.all([dbA('loans',cid),dbA('members',cid)]);const l=L.find(x=>x.id===id);if(!l)return;const m=M.find(x=>x.memberId===l.memberId);const bal=l.amount-(l.repaid||0);showModal(`<div class="mh"></div><div class="mt">Loan</div><div style="font-weight:600;margin-bottom:10px;font-size:13px">${m?.name||'?'} · ${l.purpose||'General'}</div><div class="sg"><div class="sc2"><div class="slb">Principal</div><div class="sv gold">${ksh(l.amount)}</div></div><div class="sc2"><div class="slb">Balance</div><div class="sv red">${ksh(bal)}</div></div><div class="sc2"><div class="slb">Interest</div><div class="sv">${ksh(l.interest)}</div></div><div class="sc2"><div class="slb">Due</div><div class="sv" style="font-size:10px">${fdt(l.dueDate)}</div></div></div><div class="brow">${l.status==='pending'&&canAccess('admin')?`<button class="btn btn-gold btn-sm" onclick="approveLoan(${id})">✓ Approve</button>`:''}${l.status==='active'&&canAccess('treasurer')?`<button class="btn btn-out btn-sm" onclick="repayMod(${id})">Repayment</button>`:''}<button class="btn btn-r btn-sm" onclick="dbD('loans',${id}).then(()=>{mcl();renderLoans();toast('Deleted')})">Delete</button></div>`);}
+async function approveLoan(id){if(!canAccess('admin')){toast('Admin required','err');return;}const L=await dbA('loans',SESSION.chamaId);const l=L.find(x=>x.id===id);if(l){l.status='active';l.approveDate=new Date().toISOString().split('T')[0];await dbP('loans',l);}mcl();renderLoans();toast('Approved ✓','ok');}
+async function repayMod(id){mcl();showModal(`<div class="mh"></div><div class="mt">Record Repayment</div><div class="fg"><label class="fl">Amount (KES)</label><input class="fi" type="number" id="ra"></div><button class="btn btn-gold" onclick="saveRepay(${id})">Record</button>`);}
+async function saveRepay(id){if(!canAccess('treasurer')){toast('Access denied','err');return;}const a=parseFloat(v('ra'));if(!a)return;const L=await dbA('loans',SESSION.chamaId);const l=L.find(x=>x.id===id);if(l){l.repaid=(l.repaid||0)+a;if(l.repaid>=l.totalDue)l.status='settled';await dbP('loans',l);}mcl();renderLoans();toast('Recorded ✓','ok');}
+
+// WALLETS
+async function renderWallets(){if(SESSION.plan==='free'||SESSION.plan==='starter')return;const cid=SESSION.chamaId;const [M,W]=await Promise.all([dbA('members',cid),dbA('wallets',cid)]);const myW=W.find(x=>x.memberId===SESSION.userId)||{balance:0};document.getElementById('my-bal').textContent=ksh(myW.balance);document.getElementById('my-info').textContent=SESSION.name;const el=document.getElementById('wallet-list');if(!M.length){el.innerHTML='<div class="empty"><div class="empty-ic">👛</div><h3>No members yet</h3></div>';return;}el.innerHTML=M.filter(m=>m.status==='active').map(m=>{const w=W.find(x=>x.memberId===m.memberId)||{balance:0};return `<div class="li" onclick="viewWallet('${m.memberId}')"><div class="av">${ini(m.name)}</div><div class="li-i"><div class="li-n">${m.name}</div><div class="li-s">${m.phone}</div></div><div class="li-r"><div style="font-weight:700;font-size:12px;color:var(--blue)">${ksh(w.balance)}</div>${canAccess('treasurer')?`<button class="btn btn-xs btn-out" style="margin-top:2px" onclick="event.stopPropagation();wSendTo('${m.memberId}')">Send</button>`:''}</div></div>`;}).join('');}
+function wTopup(){showModal(`<div class="mh"></div><div class="mt">Top Up Wallet</div><div class="fg"><label class="fl">Amount (KES)</label><input class="fi" type="number" id="wu-a" placeholder="500"></div><div class="alert info">IntaSend Checkout opens M-Pesa's secure payment page. Cash option records directly.</div><button class="btn btn-gold" style="margin-bottom:6px" onclick="doWTopup()">💳 M-Pesa Checkout</button><button class="btn btn-s" onclick="doWTopupCash()">💵 Cash Top Up</button>`);}
+async function doWTopup(){const amt=parseFloat(v('wu-a'));if(!amt){toast('Enter amount','err');return;}const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);if(!chama?.isPub){toast('Add IntaSend key in Settings','err');return;}const base=chama.isMode==='live'?'https://payment.intasend.com':'https://sandbox.intasend.com';window.open(`${base}/checkout/?amount=${amt}&currency=KES&api_ref=WAL-${SESSION.userId.slice(-4)}-${Date.now()}`,'_blank');toast('Checkout opened — mark paid after M-Pesa confirms','ok');mcl();}
+async function doWTopupCash(){const amt=parseFloat(v('wu-a'));if(!amt){toast('Enter amount','err');return;}const cid=SESSION.chamaId;const W=await dbA('wallets',cid);let w=W.find(x=>x.memberId===SESSION.userId);if(!w)w={chamaId:cid,memberId:SESSION.userId,balance:0};w.balance=(w.balance||0)+amt;await dbP('wallets',w);await dbP('wallet_tx',{chamaId:cid,memberId:SESSION.userId,type:'in',amount:amt,desc:'Cash top up',date:new Date().toISOString()});mcl();renderWallets();toast(`+${ksh(amt)} ✓`,'ok');}
+function wSend(){if(!canAccess('treasurer')){toast('Treasurer access required','err');return;}showModal(`<div class="mh"></div><div class="mt">Transfer Funds</div><div id="wt-b"></div>`);wSendBody();}
+async function wSendBody(){const cid=SESSION.chamaId;const M=await dbA('members',cid);document.getElementById('wt-b').innerHTML=`<div class="fg"><label class="fl">To Member</label><select class="fi" id="wt-to"><option value="">Select…</option>${M.filter(m=>m.status==='active'&&m.memberId!==SESSION.userId).map(m=>`<option value="${m.memberId}">${m.name}</option>`).join('')}</select></div><div class="fg"><label class="fl">Amount (KES)</label><input class="fi" type="number" id="wt-a" placeholder="200"></div><div class="fg"><label class="fl">Note</label><input class="fi" id="wt-n" placeholder="Optional"></div><button class="btn btn-gold" onclick="doTransfer()">Send</button>`;}
+async function wSendTo(toId){if(!canAccess('treasurer')){toast('Treasurer access required','err');return;}showModal(`<div class="mh"></div><div class="mt">Send Money</div><div class="fg"><label class="fl">Amount (KES)</label><input class="fi" type="number" id="wt-a" placeholder="200"></div><div class="fg"><label class="fl">Note</label><input class="fi" id="wt-n" placeholder="Optional"></div><button class="btn btn-gold" onclick="doTransferTo('${toId}')">Send</button>`);}
+async function doTransferTo(toId){const amt=parseFloat(v('wt-a'));if(!amt){toast('Enter amount','err');return;}const cid=SESSION.chamaId;const W=await dbA('wallets',cid);let from=W.find(x=>x.memberId===SESSION.userId);if(!from||from.balance<amt){toast('Insufficient balance','err');return;}let toW=W.find(x=>x.memberId===toId);const M=await dbA('members',cid);const m=M.find(x=>x.memberId===toId);if(!toW)toW={chamaId:cid,memberId:toId,balance:0,name:m?.name,phone:m?.phone};from.balance-=amt;toW.balance=(toW.balance||0)+amt;const note=v('wt-n');await Promise.all([dbP('wallets',from),dbP('wallets',toW)]);await dbP('wallet_tx',{chamaId:cid,memberId:SESSION.userId,type:'out',amount:amt,desc:note||`To ${m?.name}`,date:new Date().toISOString()});await dbP('wallet_tx',{chamaId:cid,memberId:toId,type:'in',amount:amt,desc:note||`From ${SESSION.name}`,date:new Date().toISOString()});mcl();renderWallets();toast(`${ksh(amt)} sent ✓`,'ok');}
+async function doTransfer(){const toId=v('wt-to');if(!toId){toast('Select recipient','err');return;}await doTransferTo(toId);}
+async function wHistory(){const cid=SESSION.chamaId;const TX=await dbA('wallet_tx',cid);const list=TX.filter(t=>t.memberId===SESSION.userId).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,30);showModal(`<div class="mh"></div><div class="mt">My Wallet History</div>${list.length?list.map(t=>`<div class="tx"><div class="tx-ic ${t.type==='in'?'in':'out'}">${t.type==='in'?'⬇️':'⬆️'}</div><div style="flex:1"><div style="font-weight:600;font-size:11px">${t.desc}</div><div style="font-size:10px;color:var(--muted)">${new Date(t.date).toLocaleDateString('en-KE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div></div><div class="tx-a ${t.type==='in'?'in':'out'}">${t.type==='in'?'+':'-'}${ksh(t.amount)}</div></div>`).join(''):'<div class="empty"><div class="empty-ic">📋</div><h3>No transactions</h3></div>'}`);}
+async function viewWallet(mId){const cid=SESSION.chamaId;const [M,W,TX]=await Promise.all([dbA('members',cid),dbA('wallets',cid),dbA('wallet_tx',cid)]);const m=M.find(x=>x.memberId===mId);const w=W.find(x=>x.memberId===mId)||{balance:0};const txs=TX.filter(t=>t.memberId===mId).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);showModal(`<div class="mh"></div><div style="display:flex;align-items:center;gap:9px;margin-bottom:11px"><div class="av">${ini(m?.name||'?')}</div><div><div style="font-weight:700;font-size:13px">${m?.name||'?'}</div><div style="font-size:10px;color:var(--muted)">${m?.phone||''}</div></div></div><div class="wcard" style="margin-bottom:9px"><div class="wlb">Balance</div><div style="font-family:'Playfair Display',serif;font-size:27px;color:var(--gold)">${ksh(w.balance)}</div></div>${txs.map(t=>`<div class="tx"><div class="tx-ic ${t.type==='in'?'in':'out'}">${t.type==='in'?'⬇️':'⬆️'}</div><div style="flex:1;font-size:10px">${t.desc}</div><div class="tx-a ${t.type==='in'?'in':'out'}">${t.type==='in'?'+':'-'}${ksh(t.amount)}</div></div>`).join('')}${canAccess('treasurer')?`<button class="btn btn-out btn-sm" style="margin-top:9px" onclick="mcl();wSendTo('${mId}')">Send Money</button>`:''} `);}
+
+// CHAT
+let chatDone=false,chatLast=0;
+async function initChat(){if(!chatDone){chatDone=true;setInterval(async()=>{const msgs=await dbA('chat',SESSION.chamaId);if(msgs.length&&msgs[msgs.length-1].id>chatLast&&scr!=='chat'){const b=document.getElementById('chat-nb');b.style.display='flex';b.textContent=msgs.filter(m=>m.id>chatLast).length;}},3500);}document.getElementById('chat-nb').style.display='none';const chama=await dbG('chamas',SESSION.chamaId);document.getElementById('chat-title').textContent=(chama?.chamaName||'Group')+' Chat';await renderChat();}
+async function renderChat(){const msgs=await dbA('chat',SESSION.chamaId);const M=await dbA('members',SESSION.chamaId);const sorted=[...msgs].sort((a,b)=>a.id-b.id);document.getElementById('chat-msgs').innerHTML=sorted.map(m=>buildMsg(m,M)).join('');const el=document.getElementById('chat-msgs');el.scrollTop=el.scrollHeight;if(sorted.length)chatLast=sorted[sorted.length-1].id;}
+function buildMsg(msg,M){const t=new Date(msg.ts).toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});if(msg.type==='system')return `<div class="msg sys"><div class="msg-b">${msg.text}</div></div>`;if(msg.type==='ai')return `<div class="msg ai-msg"><div class="msg-n">🤖 ${msg.aiModel||'AI'}</div><div class="msg-b">${msg.text}</div><div class="msg-tm">${t}</div></div>`;const isMe=msg.authorId===SESSION.userId;const m=M.find(x=>x.memberId===msg.authorId);const role=m?.role||'member';return `<div class="msg ${isMe?'mine':'theirs'} ${msg.pinned?'pinned':''}"><div class="msg-n"><span class="rpill ${role}" style="font-size:8px">${roleIcon(role)}</span> ${msg.authorName||'?'}</div><div class="msg-b" onclick="msgAct(${msg.id})">${msg.pinned?'📌 ':''}${msg.text}</div><div class="msg-tm">${t}</div></div>`;}
+async function sendMsg(){const inp=document.getElementById('chat-in');const text=inp.value.trim();if(!text)return;inp.value='';inp.style.height='auto';const chama=await dbG('chamas',SESSION.chamaId);await dbP('chat',{chamaId:SESSION.chamaId,authorId:SESSION.userId,authorName:SESSION.name,role:SESSION.role,text,ts:new Date().toISOString(),type:'msg'});await renderChat();if(canAccess('admin')&&(chama?.claude||chama?.gpt||chama?.grok))moderateMsg(text,chama);}
+function cq(t){document.getElementById('chat-in').value=t;sendMsg();}
+async function chatAI(){const inp=document.getElementById('chat-in');const q=inp.value.trim()||'What is our chama financial status?';inp.value='';await dbP('chat',{chamaId:SESSION.chamaId,authorId:SESSION.userId,authorName:SESSION.name,role:SESSION.role,text:q,ts:new Date().toISOString(),type:'msg'});await renderChat();const chama=await dbG('chamas',SESSION.chamaId);const ctx=await getCTX();const sys=`You are the AI for ${chama?.chamaName||'a chama'}. Data: ${ctx}. Answer in 2-4 sentences. KES currency.`;let res=null,model='AI';if(chama?.claude){res=await callClaude(q,sys,chama);model='Claude';}else if(chama?.gpt){res=await callGPT(q,sys,chama);model='GPT-4o';}else if(chama?.grok){res=await callGrok(q,sys,chama);model='Grok';}if(res){await dbP('chat',{chamaId:SESSION.chamaId,authorId:'ai',authorName:'AI',text:res,ts:new Date().toISOString(),type:'ai',aiModel:model});await renderChat();}else{await dbP('chat',{chamaId:SESSION.chamaId,text:'⚠️ Add AI keys in Settings to enable AI chat.',ts:new Date().toISOString(),type:'system'});await renderChat();}}
+async function moderateMsg(text,chama){if(!chama?.gpt&&!chama?.claude)return;const sys='Moderate Kenyan chama chat. If spam/harassment/explicit: respond MODERATE:[reason]. Else: OK.';const r=chama?.gpt?await callGPT(text,sys,chama):await callClaude(text,sys,chama);if(r&&r.startsWith('MODERATE:')){const msgs=await dbA('chat',SESSION.chamaId);const last=msgs[msgs.length-1];if(last&&last.text===text){await dbD('chat',last.id);await dbP('chat',{chamaId:SESSION.chamaId,text:`🛡️ Removed: ${r.replace('MODERATE:','').trim()}`,ts:new Date().toISOString(),type:'system'});await renderChat();toast('Message moderated','err');}}}
+async function openMod(){if(!canAccess('admin')){toast('Admin required','err');return;}const msgs=await dbA('chat',SESSION.chamaId);const recent=[...msgs].sort((a,b)=>b.id-a.id).slice(0,12);showModal(`<div class="mh"></div><div class="mt">🛡️ Moderation</div>${recent.map(m=>`<div class="li"><div class="li-i"><div style="font-size:9px;color:var(--muted)">${m.authorName}</div><div style="font-size:11px">${m.text.slice(0,50)}${m.text.length>50?'…':''}</div></div><button class="btn btn-xs btn-r" onclick="dbD('chat',${m.id}).then(()=>{mcl();renderChat();toast('Deleted')})">Del</button><button class="btn btn-xs btn-out" onclick="pinMsg(${m.id})">${m.pinned?'Unpin':'📌'}</button></div>`).join('')}`);}
+async function pinMsg(id){if(!canAccess('admin')){toast('Admin required','err');return;}const msgs=await dbA('chat',SESSION.chamaId);const m=msgs.find(x=>x.id===id);if(m){m.pinned=!m.pinned;await dbP('chat',m);}mcl();renderChat();}
+async function msgAct(id){if(!canAccess('admin'))return;showModal(`<div class="mh"></div><div class="mt">Message Actions</div><button class="btn btn-r" style="margin-bottom:6px" onclick="dbD('chat',${id}).then(()=>{mcl();renderChat();toast('Deleted')})">🗑️ Delete</button><button class="btn btn-out" onclick="pinMsg(${id})">📌 Pin / Unpin</button>`);}
+
+// TRIPLE AI ENGINE
+async function callClaude(p,sys='',cfg=null){const key=(cfg||await dbG('chamas',SESSION.chamaId))?.claude;if(!key)return null;const b={model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:p}]};if(sys)b.system=sys;try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(b)});if(!r.ok)return null;const d=await r.json();return d.content?.[0]?.text||null;}catch{return null;}}
+async function callGrok(p,sys='',cfg=null){const key=(cfg||await dbG('chamas',SESSION.chamaId))?.grok;if(!key)return null;const msgs=[];if(sys)msgs.push({role:'system',content:sys});msgs.push({role:'user',content:p});try{const r=await fetch('https://api.x.ai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'grok-3-mini',messages,max_tokens:1000})});if(!r.ok)return null;const d=await r.json();return d.choices?.[0]?.message?.content||null;}catch{return null;}}
+async function callGPT(p,sys='',cfg=null){const key=(cfg||await dbG('chamas',SESSION.chamaId))?.gpt;if(!key)return null;const msgs=[];if(sys)msgs.push({role:'system',content:sys});msgs.push({role:'user',content:p});try{const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',messages,max_tokens:1000})});if(!r.ok)return null;const d=await r.json();return d.choices?.[0]?.message?.content||null;}catch{return null;}}
+async function tripleAI(p,sys,ns){aiCache[ns]={};const [cl,gk,gp]=await Promise.all([callClaude(p,sys),callGrok(p,sys),callGPT(p,sys)]);aiCache[ns].cl=cl||'⚠️ No response — check API key in Settings';aiCache[ns].gk=gk||'⚠️ No response — check API key in Settings';aiCache[ns].gp=gp||'⚠️ No response — check API key in Settings';return{cl,gk,gp};}
+function ss(ns,src,el){const c=aiCache[ns];if(!c)return;document.querySelectorAll(`#${ns}-src .asb`).forEach(b=>b.classList.remove('act'));el.classList.add('act');const out=document.getElementById('ai-'+ns);if(src==='all')out.textContent=(c.cl?`🧠 Claude:\n${c.cl}\n\n`:'')+(c.gk?`⚡ Grok:\n${c.gk}\n\n`:'')+(c.gp?`🤖 GPT-4o:\n${c.gp}`:'');else out.textContent=c[src]||'No response from this model.';}
+async function getCTX(){const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);const [M,C,L]=await Promise.all([dbA('members',cid),dbA('contributions',cid),dbA('loans',cid)]);const n=now(),paid=C.filter(c=>c.status==='completed');const pIds=paid.filter(c=>{const d=new Date(c.date);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}).map(c=>c.memberId);const late=M.filter(m=>m.status==='active'&&!pIds.includes(m.memberId)).map(m=>m.name);return `Chama:${chama?.chamaName}|Plan:${chama?.plan}|Members:${M.filter(m=>m.status==='active').length}|Pot:KES${paid.reduce((s,c)=>s+c.amount,0).toLocaleString()}|Month:KES${paid.filter(c=>{const d=new Date(c.date);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}).reduce((s,c)=>s+c.amount,0).toLocaleString()}/${((chama?.monthlyTarget||5000)*M.filter(m=>m.status==='active').length).toLocaleString()}|Loans:${L.filter(l=>l.status==='active').length}|Outstanding:KES${L.filter(l=>l.status==='active').reduce((s,l)=>s+(l.amount-(l.repaid||0)),0).toLocaleString()}|Late:${late.length?late.join(','):'None'}|${n.toLocaleDateString('en-KE',{month:'long',year:'numeric'})}`;}
+async function genInsights(){const ctx=await getCTX();const el=document.getElementById('ai-ins');el.innerHTML='<div class="ath"><div class="ad"></div><div class="ad"></div><div class="ad"></div></div>';const sys=`Financial advisor for Kenyan chama. Data: ${ctx}. Give 3 sharp insights (2 sentences each). Specific, actionable.`;const r=await tripleAI('Analyze.',sys,'ins');el.textContent=r.cl||r.gk||r.gp||'Add AI API keys in Settings to get insights.';}
+async function genReport(){const ctx=await getCTX();const el=document.getElementById('ai-rpt');el.innerHTML='<div class="ath"><div class="ad"></div><div class="ad"></div><div class="ad"></div></div>';const r=await tripleAI('Generate report.',`Financial analyst. Data: ${ctx}. 200-word report: Summary · Highlights · Concerns · Recommendation.`,'rpt');el.textContent=r.cl||r.gk||r.gp||'Add API keys.';}
+async function runScan(){const cid=SESSION.chamaId;const [M,C,L]=await Promise.all([dbA('members',cid),dbA('contributions',cid),dbA('loans',cid)]);const n=now();const pIds=C.filter(c=>{const d=new Date(c.date);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()&&c.status==='completed'}).map(c=>c.memberId);const flags=[];M.filter(m=>m.status==='active').forEach(m=>{const mc=C.filter(c=>c.memberId===m.memberId&&c.status==='completed');if(!mc.length)flags.push(`${m.name}: zero contributions`);else{const last=new Date(Math.max(...mc.map(c=>new Date(c.date))));if((n-last)/(864e5*30)>2)flags.push(`${m.name}: inactive 2+ months`);}if(!pIds.includes(m.memberId))flags.push(`${m.name}: unpaid this month`);});L.filter(l=>l.status==='active').forEach(l=>{const m=M.find(x=>x.memberId===l.memberId);if(l.dueDate&&new Date(l.dueDate)<n)flags.push(`OVERDUE LOAN: ${m?.name} — ${ksh(l.amount-(l.repaid||0))}`);});const el=document.getElementById('ai-scan');el.innerHTML='<div class="ath"><div class="ad"></div><div class="ad"></div><div class="ad"></div></div>';const p=`Chama flags:\n${flags.length?flags.join('\n'):'None detected.'}\nFor each: severity (🔴🟡🟢), explanation, action. If none, confirm health.`;const r=await callGrok(p)||await callClaude(p)||await callGPT(p);el.textContent=r||'Add Grok, Claude or GPT-4o key.';if(flags.length){const b=document.getElementById('ai-nb');b.style.display='flex';b.textContent=flags.length;}}
+async function runNudge(){const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);const [M,C]=await Promise.all([dbA('members',cid),dbA('contributions',cid)]);const n=now();const pIds=C.filter(c=>{const d=new Date(c.date);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()&&c.status==='completed'}).map(c=>c.memberId);const late=M.filter(m=>m.status==='active'&&!pIds.includes(m.memberId));const el=document.getElementById('ai-nudge');const btns=document.getElementById('nudge-btns');if(!late.length){el.textContent='✅ Everyone has paid this month!';btns.style.display='none';return;}el.innerHTML='<div class="ath"><div class="ad"></div><div class="ad"></div><div class="ad"></div></div>';const p=`WhatsApp reminders for ${chama?.chamaName} late payers (${n.toLocaleDateString('en-KE',{month:'long',year:'numeric'})}): ${late.map(m=>m.name).join(', ')}. Each 2-3 sentences, warm but firm, slightly different tone per person. Format: [Name]: message`;const r=await callGPT(p)||await callClaude(p)||await callGrok(p);el.textContent=r||'Add GPT-4o, Claude or Grok key.';if(r){btns.style.display='block';btns.innerHTML=late.map(m=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><div class="av" style="width:26px;height:26px;font-size:9px">${ini(m.name)}</div><div style="flex:1;font-size:11px">${m.name}</div><button class="btn btn-xs btn-out" onclick="wa('${m.phone}','${m.name}')">📲</button></div>`).join('');}}
+async function runDiag(){const cid=SESSION.chamaId;const [M,C,L]=await Promise.all([dbA('members',cid),dbA('contributions',cid),dbA('loans',cid)]);const chama=await dbG('chamas',cid);const checks={DB:DB?'✓':'✗',Members:M.length,Contributions:C.length,Loans:L.length,Plan:chama?.plan||'?',IntaSend:chama?.isPub?'✓':'✗',Claude:chama?.claude?'✓':'✗',Grok:chama?.grok?'✓':'✗','GPT-4o':chama?.gpt?'✓':'✗',SW:'serviceWorker' in navigator?'✓':'✗',Ver:VER};const el=document.getElementById('ai-diag');el.innerHTML='<div class="ath"><div class="ad"></div><div class="ad"></div><div class="ad"></div></div>';const r=await callClaude(`Health: ${JSON.stringify(checks)}. Score/10, working, issues, self-heal steps.`)||await callGPT(`Health: ${JSON.stringify(checks)}`)||await callGrok(`Health: ${JSON.stringify(checks)}`);el.textContent=r||'Add Claude or GPT-4o key.';}
+
+// LITERACY AGENT
+async function initLit(){const cid=SESSION.chamaId;const mem=await dbA('lit_memory',cid);const rated=mem.filter(m=>m.rating>0);litSt.q=mem.length;litSt.rated=rated.length;litSt.total=rated.reduce((s,m)=>s+m.rating,0);litSt.lv=Math.min(10,1+Math.floor(mem.length/5));document.getElementById('lit-q').textContent=litSt.q;document.getElementById('lit-r').textContent=litSt.rated?('⭐'+(litSt.total/litSt.rated).toFixed(1)):'—';document.getElementById('lit-lv').textContent=litSt.lv;document.getElementById('lit-topics').innerHTML=LIT_TOPICS.map(t=>`<div class="topic" onclick="litTopic('${t}')">${t}</div>`).join('');}
+function litTopic(t){document.getElementById('lit-in').value=`Teach me: ${t}`;litAsk();}
+async function litAsk(){const q=document.getElementById('lit-in').value.trim();if(!q){toast('Ask a question','err');return;}document.getElementById('lit-in').value='';const convo=document.getElementById('lit-convo');const qel=document.createElement('div');qel.className='lq';qel.textContent=q;convo.appendChild(qel);const thinkEl=document.createElement('div');thinkEl.className='la';thinkEl.innerHTML='<div class="ath"><div class="ad"></div><div class="ad"></div><div class="ad"></div></div>';convo.appendChild(thinkEl);convo.scrollTop=convo.scrollHeight;const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);const mem=await dbA('lit_memory',cid);const good=mem.filter(m=>m.rating>=4).slice(-3);const bad=mem.filter(m=>m.rating&&m.rating<=2).slice(-3);const sys=`Financial literacy agent for Kenyan chama (level ${litSt.lv}/10). Member: ${SESSION.name}.${good.length?` High-rated: ${good.map(m=>m.topic).join(', ')}.`:''}${bad.length?` Improve: ${bad.map(m=>m.topic).join(', ')}.`:''} Style: clear, practical, Kenya-specific (M-Pesa, NSE, SACCOs, Hustler Fund). End with one action tip.`;const answer=await callClaude(q,sys,chama)||await callGPT(q,sys,chama)||await callGrok(q,sys,chama)||'Add an AI API key in Settings.';thinkEl.textContent=answer;const rEl=document.createElement('div');rEl.style.cssText='display:flex;align-items:center;gap:5px;padding:2px';rEl.innerHTML='<span style="font-size:10px;color:var(--muted)">Rate:</span>'+[1,2,3,4,5].map(n=>`<span class="rstar" onclick="rateLit(this,${n},'${q.replace(/'/g,"\\'")}')">★</span>`).join('');convo.appendChild(rEl);convo.scrollTop=convo.scrollHeight;await dbP('lit_memory',{chamaId:cid,q,answer,topic:q.split(' ').slice(0,4).join(' '),ts:new Date().toISOString(),level:litSt.lv,rating:0});litSt.q++;litSt.lv=Math.min(10,1+Math.floor(litSt.q/5));document.getElementById('lit-q').textContent=litSt.q;document.getElementById('lit-lv').textContent=litSt.lv;}
+async function rateLit(el,rating,q){el.parentElement.querySelectorAll('.rstar').forEach((s,i)=>s.classList.toggle('on',i<rating));const cid=SESSION.chamaId;const mem=await dbA('lit_memory',cid);const last=[...mem].reverse().find(m=>m.q===q);if(last){last.rating=rating;await dbP('lit_memory',last);}litSt.rated++;litSt.total+=rating;document.getElementById('lit-r').textContent='⭐'+(litSt.total/litSt.rated).toFixed(1);toast(`${rating}★ — agent learns!`,'ok');}
+async function openLitStats(){const cid=SESSION.chamaId;const mem=await dbA('lit_memory',cid);const rated=mem.filter(m=>m.rating>0);const avg=rated.length?(rated.reduce((s,m)=>s+m.rating,0)/rated.length).toFixed(2):'—';const top=[...mem].sort((a,b)=>(b.rating||0)-(a.rating||0)).slice(0,3);showModal(`<div class="mh"></div><div class="mt">Agent Stats</div><div class="ltstats"><div class="lts"><div class="lts-v">${mem.length}</div><div class="lts-l">Total Qs</div></div><div class="lts"><div class="lts-v">${avg}</div><div class="lts-l">Avg ⭐</div></div><div class="lts"><div class="lts-v">${litSt.lv}</div><div class="lts-l">Level</div></div></div>${top.map(m=>`<div class="li"><div class="li-i"><div style="font-size:11px">${m.q.slice(0,50)}</div></div><span class="badge gold">${m.rating||0}★</span></div>`).join('')}`);}
+
+// SUPER ADMIN
+async function renderSuper(){const allChamas=await dbAll();const allMembers=await dbAllMembers();const platform=await dbG('platform','super_settings')||{starterPrice:299,proPrice:799,txFee:0.5};const pro=allChamas.filter(c=>c.plan==='pro');const starter=allChamas.filter(c=>c.plan==='starter');const monthRev=(pro.length*(platform.proPrice||799))+(starter.length*(platform.starterPrice||299));document.getElementById('rev-amount').textContent=ksh(monthRev);document.getElementById('rev-sub').textContent=`${pro.length} Pro · ${starter.length} Starter · ${allChamas.filter(c=>c.plan==='free').length} Free`;document.getElementById('sa-chamas').textContent=allChamas.length;document.getElementById('sa-members').textContent=allMembers.filter(m=>m.status==='active').length;document.getElementById('sa-pro').textContent=pro.length;document.getElementById('sa-free').textContent=allChamas.filter(c=>c.plan==='free').length;const el=document.getElementById('sa-list');el.innerHTML=allChamas.length?allChamas.map(ch=>{const mems=allMembers.filter(m=>m.chamaId===ch.id&&m.status==='active');const rev=PLANS[ch.plan]?.price||0;return `<div class="chama-card" onclick="saView('${ch.id}')"><div class="chama-header"><div><div class="chama-name">${ch.chamaName}</div><div class="chama-code">Code: ${ch.code} · ${fdt(ch.createdAt)}</div></div><span class="plan-badge plan-${ch.plan}">${ch.plan}</span></div><div class="chama-stats"><div class="cs"><div class="cs-v">${mems.length}</div><div class="cs-l">Members</div></div><div class="cs"><div class="cs-v ${rev>0?'gold':''}">${ksh(rev)}</div><div class="cs-l">Mo. Rev</div></div><div class="cs"><div class="cs-v">${ch.code}</div><div class="cs-l">Code</div></div></div></div>`;}).join(''):'<div class="empty"><div class="empty-ic">🏗️</div><h3>No chamas yet</h3><p>Share the platform — chamas create accounts using the onboarding screen.</p></div>';sv('sa-pname',platform.platformName||'myChama Platform');sv('sa-starter',platform.starterPrice||299);sv('sa-pro-price',platform.proPrice||799);sv('sa-fee',platform.txFee||0.5);}
+async function saView(id){const ch=await dbG('chamas',id);const M=await dbA('members',id);showModal(`<div class="mh"></div><div class="mt">${ch.chamaName}</div><div class="sg"><div class="sc2"><div class="slb">Code</div><div class="sv" style="font-size:13px;letter-spacing:2px">${ch.code}</div></div><div class="sc2"><div class="slb">Plan</div><span class="plan-badge plan-${ch.plan}">${ch.plan}</span></div><div class="sc2"><div class="slb">Members</div><div class="sv">${M.filter(m=>m.status==='active').length}</div></div><div class="sc2"><div class="slb">Monthly Rev</div><div class="sv gold">${ksh(PLANS[ch.plan]?.price||0)}</div></div></div><div class="fg"><label class="fl">Change Plan</label><select class="fi" id="sa-pc"><option value="free" ${ch.plan==='free'?'selected':''}>Free</option><option value="starter" ${ch.plan==='starter'?'selected':''}>Starter (KES 299)</option><option value="pro" ${ch.plan==='pro'?'selected':''}>Pro (KES 799)</option></select></div><button class="btn btn-gold btn-sm" style="margin-bottom:6px" onclick="saChangePlan('${id}')">Update Plan</button><button class="btn btn-r btn-sm" onclick="saDelChama('${id}')">🗑️ Delete Chama</button>`);}
+async function saChangePlan(id){const plan=v('sa-pc');const ch=await dbG('chamas',id);ch.plan=plan;await dbP('chamas',ch);mcl();renderSuper();toast(`Plan updated to ${plan} ✓`,'ok');}
+async function saDelChama(id){if(!confirm('Delete this chama and ALL data? Cannot be undone.'))return;await dbClearChama(id);await dbD('chamas',id);mcl();renderSuper();toast('Chama deleted','ok');}
+async function saveSuperCfg(){const s={id:'super_settings',platformName:v('sa-pname'),superPin:v('sa-spin')||DEFAULT_SUPER,starterPrice:parseFloat(v('sa-starter'))||299,proPrice:parseFloat(v('sa-pro-price'))||799,txFee:parseFloat(v('sa-fee'))||0.5};await dbP('platform',s);toast('Platform settings saved ✓','ok');}
+
+// SETTINGS
+async function popSettings(){if(!canAccess('treasurer'))return;const chama=await dbG('chamas',SESSION.chamaId);sv('s-name',chama?.chamaName||'');sv('s-target',chama?.monthlyTarget||'');sv('s-day',chama?.conDay||5);sv('s-int',chama?.interest||'');sv('s-is',chama?.isPub||'');sv('s-ismode',chama?.isMode||'sandbox');sv('s-claude',chama?.claude||'');sv('s-grok',chama?.grok||'');sv('s-gpt',chama?.gpt||'');const pd=document.getElementById('plan-display');pd.innerHTML=`<div style="display:flex;align-items:center;gap:7px;margin-bottom:9px"><span class="plan-badge plan-${chama?.plan||'free'}">${PLANS[chama?.plan||'free']?.name}</span><span style="font-size:10px;color:var(--muted)">${PLANS[chama?.plan||'free']?.maxMembers} members · ${PLANS[chama?.plan||'free']?.ai} AI</span></div>`;}
+async function saveSettings(){if(!canAccess('treasurer')){toast('Access denied','err');return;}const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);chama.chamaName=v('s-name')||chama.chamaName;chama.monthlyTarget=parseFloat(v('s-target'))||chama.monthlyTarget;chama.conDay=parseInt(v('s-day'))||chama.conDay;chama.interest=parseFloat(v('s-int'))||chama.interest;chama.isPub=v('s-is')||chama.isPub;chama.isMode=v('s-ismode')||chama.isMode;chama.claude=v('s-claude')||chama.claude;chama.grok=v('s-grok')||chama.grok;chama.gpt=v('s-gpt')||chama.gpt;const np=v('s-pin');if(np.length===4){const user=await dbG('users',SESSION.userId);if(user){user.pin=np;SESSION.userPin=np;await dbP('users',user);}}await dbP('chamas',chama);toast('Settings saved ✓','ok');refreshDash();}
+
+// EXPORT
+async function exportCSV(){if(!canAccess('treasurer')){toast('Access denied','err');return;}const cid=SESSION.chamaId;const [M,C,L]=await Promise.all([dbA('members',cid),dbA('contributions',cid),dbA('loans',cid)]);const chama=await dbG('chamas',cid);let csv='CONTRIBUTIONS\nMember,Amount,Date,Method,Status\n';C.forEach(c=>{const m=M.find(x=>x.memberId===c.memberId);csv+=`"${m?.name||'?'}",${c.amount},"${c.date}","${c.method||'cash'}","${c.status}"\n`;});csv+='\nLOANS\nMember,Amount,Purpose,Due,Interest,TotalDue,Repaid,Status\n';L.forEach(l=>{const m=M.find(x=>x.memberId===l.memberId);csv+=`"${m?.name||'?'}",${l.amount},"${l.purpose||''}","${l.dueDate}",${l.interest||0},${l.totalDue||0},${l.repaid||0},"${l.status}"\n`;});dl(csv,'text/csv',`${(chama?.chamaName||'chama').replace(/\s/g,'_')}_${new Date().toISOString().split('T')[0]}.csv`);toast('CSV exported ✓','ok');}
+async function backupJSON(){if(!canAccess('admin')){toast('Admin required','err');return;}const cid=SESSION.chamaId;const [M,C,L,W,chama]=await Promise.all([dbA('members',cid),dbA('contributions',cid),dbA('loans',cid),dbA('wallets',cid),dbG('chamas',cid)]);dl(JSON.stringify({version:VER,date:new Date().toISOString(),chamaName:chama?.chamaName,members:M,contributions:C,loans:L,wallets:W},null,2),'application/json',`mychama_${(chama?.chamaName||'backup').replace(/\s/g,'_')}_${new Date().toISOString().split('T')[0]}.json`);toast('Backup saved ✓','ok');}
+function dl(content,type,name){const b=new Blob([content],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+function importJSON(){if(!canAccess('admin')){toast('Admin required','err');return;}document.getElementById('f-import').click();}
+async function handleImport(e){const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!confirm(`Import ${data.members?.length||0} members?`))return;const cid=SESSION.chamaId;if(data.members)for(const r of data.members){r.chamaId=cid;await dbP('members',r);}if(data.contributions)for(const r of data.contributions){r.chamaId=cid;await dbP('contributions',r);}if(data.loans)for(const r of data.loans){r.chamaId=cid;await dbP('loans',r);}refreshDash();toast('Import complete ✓','ok');}catch(err){toast('Import failed: '+err.message,'err');}e.target.value='';}
+async function confirmReset(){if(!canAccess('admin')){toast('Admin required','err');return;}const p=prompt('Enter your PIN to confirm:');if(p!==SESSION.userPin){toast('Wrong PIN','err');return;}if(!confirm('Delete ALL chama data? Cannot be undone.'))return;await dbClearChama(SESSION.chamaId);refreshDash();toast('Reset complete','ok');}
+
+// SW + SCHEDULER
+function regSW(){if(!('serviceWorker' in navigator))return;navigator.serviceWorker.register('./sw.js').then(reg=>{reg.addEventListener('updatefound',()=>{const w=reg.installing;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)document.getElementById('upd').style.display='block';});});}).catch(()=>{});}
+function doUpd(){navigator.serviceWorker?.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));window.location.reload(true);}
+function startSched(){const key='mc4_s_'+SESSION.chamaId;const last=parseInt(localStorage.getItem(key)||'0');if(Date.now()-last<4*3600*1000)return;localStorage.setItem(key,Date.now().toString());setTimeout(async()=>{const cid=SESSION.chamaId;const [M,C,L]=await Promise.all([dbA('members',cid),dbA('contributions',cid),dbA('loans',cid)]);const n=now();const pIds=C.filter(c=>{const d=new Date(c.date);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()&&c.status==='completed'}).map(c=>c.memberId);const total=M.filter(m=>m.status==='active'&&!pIds.includes(m.memberId)).length+L.filter(l=>l.status==='active'&&l.dueDate&&new Date(l.dueDate)<n).length;if(total>0){const b=document.getElementById('ai-nb');b.style.display='flex';b.textContent=total;}},2500);}
+
+// BOOT
+async function initApp(){const cid=SESSION.chamaId;const chama=await dbG('chamas',cid);SESSION.plan=chama?.plan||'free';document.getElementById('abar-chama').textContent='🌿 '+(chama?.chamaName||'myChama');document.getElementById('abar-role').textContent=roleIcon(SESSION.role)+' '+SESSION.role.charAt(0).toUpperCase()+SESSION.role.slice(1);updateBanner(chama);applyGates();refreshDash();startSched();}
+async function boot(){await openDB();regSW();
+const saved=localStorage.getItem('mc4_sess');if(saved){try{const {chamaId,userId}=JSON.parse(saved);const [chama,user]=await Promise.all([dbG('chamas',chamaId),dbG('users',userId)]);if(chama&&user){SESSION={chamaId,userId,role:user.role,name:user.name,plan:chama.plan,isSuper:false,userPin:user.pin};document.getElementById('onboard').style.display='none';document.getElementById('lock').style.display='flex';document.getElementById('l-name').textContent=user.name;document.getElementById('l-chama').textContent=chama.chamaName;document.getElementById('l-av').textContent=ini(user.name);document.getElementById('l-switch').style.display='block';document.getElementById('l-role-badge').innerHTML=`<div class="l-role rl-${user.role}">${roleIcon(user.role)} ${user.role}</div>`;return;}}catch(e){localStorage.removeItem('mc4_sess');}}/* No session — show onboarding */}
+boot();
+</script>
+</body>
+</html>

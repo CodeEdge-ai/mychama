@@ -1,0 +1,14 @@
+{
+  "name": "myChama Platform",
+  "short_name": "myChama",
+  "description": "AI-powered multi-chama savings platform",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#020A05",
+  "theme_color": "#020A05",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "https://via.placeholder.com/192x192/020A05/D4A843?text=%F0%9F%8C%BF", "sizes": "192x192", "type": "image/png" },
+    { "src": "https://via.placeholder.com/512x512/020A05/D4A843?text=%F0%9F%8C%BF", "sizes": "512x512", "type": "image/png" }
+  ]
+}
